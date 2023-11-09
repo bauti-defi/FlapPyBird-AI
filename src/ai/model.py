@@ -1,10 +1,9 @@
 from enum import Enum
 
-import numpy as np
-from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.initializers import RandomNormal
 
 from .game_observation import GameObservation
 
@@ -23,17 +22,18 @@ class Model:
                     10, activation="relu", input_shape=(5,)
                 ),  # Hidden layer with 10 neurons, and input shape of 5 (number of observation variables)
                 layers.Dense(
-                    2, activation="softmax"
-                ),  # Output layer with 2 neurons (number of actions)
+                    1, activation="sigmoid"
+                ),  # Output layer with 1 neuron for binary decision
             ]
         )
 
-        # Compile the model with the Adam optimizer and a loss function for categorical outcomes
+        # Compile the model with the Adam optimizer and a loss function for binary outcomes(0 or 1 - jump or don't jump)
         self.model.compile(
             optimizer=Adam(learning_rate=0.001),
-            loss="sparse_categorical_crossentropy",
+            loss="binary_crossentropy",
             metrics=["accuracy"],
         )
+        print(self.model.get_weights())
 
     # Decides action based on game observation
     def predict(self, game_observation: GameObservation) -> GameAction:
@@ -42,8 +42,8 @@ class Model:
             1, -1
         )  # Reshape the observation to be a batch of one
         # Get the model's prediction
-        action_probabilities = self.model.predict(observation)
-        # Determine the action based on the highest probability
-        action = GameAction(np.argmax(action_probabilities[0]))
-
+        action_probability = self.model.predict(observation)
+        # Determine the action based on the probability
+        action = GameAction.JUMP if action_probability > 0.5 else GameAction.DO_NOTHING
+        print(f"Action: {action.name}, Probability: {action_probability}")
         return action
