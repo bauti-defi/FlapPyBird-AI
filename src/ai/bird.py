@@ -1,5 +1,6 @@
 
 import random
+import time
 
 from .entities.player import Player
 from .model import Model
@@ -22,10 +23,20 @@ class Bird(Player):
     def __init__(self, config) -> None:
         super().__init__(config, random_y=random.randint(-10, 10))
         self.model = Model()
-        self.fitness = Score(config)
-
+        self.fitness = 0
+        
+        self.score = Score(config)
+        self.time_alive = time.time()
+        self.is_alive = True
+        
+    def set_alive(self, alive):
+        self.is_alive = alive
+    
+    def get_alive(self):
+        return self.is_alive
+    
     def get_model(self):
         return self.model
     
-    def get_fitness(self):
-        return self.fitness
+    def get_score(self):
+        return self.score

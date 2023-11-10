@@ -11,7 +11,6 @@ class GameAction(Enum):
     JUMP = 0
     DO_NOTHING = 1
 
-
 class Model:
     def __init__(self) -> None:
         # Create a simple sequential model

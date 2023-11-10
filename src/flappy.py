@@ -1,5 +1,5 @@
 import asyncio
-import random
+import copy
 import sys
 
 import pygame
@@ -38,7 +38,7 @@ class Flappy:
         window = Window(288, 512)
         screen = pygame.display.set_mode((window.width, window.height))
         images = Images()
-
+        
         self.config = GameConfig(
             screen=screen,
             clock=pygame.time.Clock(),
@@ -52,7 +52,7 @@ class Flappy:
             False if len(sys.argv) > 1 and sys.argv[1] == "ai" else True
         )
         if not self.human_player:
-
+            self.genetic_algorithm = GeneticAlgorithm(population_size=NUMBER_OF_BIRDS, config=self.config)
             self.model_results = []
 
 
@@ -60,10 +60,15 @@ class Flappy:
         while True:
             self.background = Background(self.config)
             self.floor = Floor(self.config)
-
+            
             self.score = Score(self.config)
-            self.population = GeneticAlgorithm(population_size=NUMBER_OF_BIRDS).initialize_population(self.config)
 
+            # We need a global population variable to keep track of the new generation birds
+            # And one internal to play the game.
+            #self.game_population = self.population[:]
+
+            self.population = self.genetic_algorithm.get_population()
+            # self.population = copy.deepcopy(self.g_population)
             self.welcome_message = WelcomeMessage(self.config)
             self.game_over_message = GameOver(self.config)
             self.pipes = Pipes(self.config)
@@ -71,7 +76,7 @@ class Flappy:
             if not self.human_player:
                 print("Starting in AI mode")
                 await self.agent_play_v2()
-                # await self.game_over()
+                await self.game_over_v2()
             else:
                 await self.splash()
                 await self.play()
@@ -115,15 +120,16 @@ class Flappy:
         return m_left or space_or_up or screen_tap
 
     async def agent_play_v2(self):
-        self.score.reset()
-
         for bird in self.population:
+            bird.set_alive(True)
+            bird.score.reset()
             bird.set_mode(PlayerMode.NORMAL)
         
         while True:
             for bird in self.population:
+                
                 bird_model = bird.get_model()
-                bird_fitness = bird.get_fitness()
+                bird_score = bird.get_score()
                 # the observation we will pass to the AI agent
                 observation = GameObservation(
                     bird_y_pos=bird.y,
@@ -154,7 +160,7 @@ class Flappy:
 
                 for i, pipe in enumerate(self.pipes.upper):
                     if bird.crossed(pipe):
-                        bird_fitness.add()
+                        bird_score.add()
 
                 for event in pygame.event.get():
                     self.check_quit_event(event)
@@ -250,6 +256,30 @@ class Flappy:
             await asyncio.sleep(0)
             self.config.tick()
 
+    
+    async def game_over_v2(self):
+        """
+            Here we should calculate the fitness of the bird and add it to the list of results.
+            Create the new population and all of that.
+        """
+        print("AI agent lost. Restarting...")
+        print(f"POPULATION: {self.genetic_algorithm.get_population()}")
+        self.population = self.genetic_algorithm.generate_new_population(self.config)
+        # self.population = GeneticAlgorithm(population_size=NUMBER_OF_BIRDS, config=self.config)
+        # self.model_results.append(GameResult(self.score.score))
+
+        self.background.tick()
+        self.floor.tick()
+        self.pipes.tick()
+        self.score.tick()
+        for bird in self.population:
+            bird.tick()
+        self.game_over_message.tick()
+
+        self.config.tick()
+        pygame.display.update()
+        await asyncio.sleep(0)
+        
     async def game_over(self):
         """crashes the player down and shows gameover image"""
 
