@@ -1,13 +1,11 @@
 import asyncio
-import copy
 import sys
 
 import pygame
 from pygame.locals import K_ESCAPE, K_SPACE, K_UP, KEYDOWN, QUIT
 
 from .ai.game_observation import GameObservation
-from .ai.game_result import GameResult
-from .ai.model import GameAction, Model
+from .ai.model import GameAction
 from .ai.genetic_algorithm import GeneticAlgorithm
 from .ai.entities import (
     Background,
@@ -63,12 +61,9 @@ class Flappy:
             
             self.score = Score(self.config)
 
-            # We need a global population variable to keep track of the new generation birds
-            # And one internal to play the game.
-            #self.game_population = self.population[:]
-
             self.population = self.genetic_algorithm.get_population()
-            # self.population = copy.deepcopy(self.g_population)
+            self.next_gen_population = []
+            
             self.welcome_message = WelcomeMessage(self.config)
             self.game_over_message = GameOver(self.config)
             self.pipes = Pipes(self.config)
@@ -121,8 +116,7 @@ class Flappy:
 
     async def agent_play_v2(self):
         for bird in self.population:
-            bird.set_alive(True)
-            bird.score.reset()
+            bird.start_flying()
             bird.set_mode(PlayerMode.NORMAL)
         
         while True:
@@ -154,9 +148,10 @@ class Flappy:
                     pygame.event.clear()
 
                 if bird.collided(self.pipes, self.floor):
-                    if(len(self.population) == 1):
+                    bird.stop_flying()
+                    self.genetic_algorithm.migrate_population(bird, self.next_gen_population)
+                    if(len(self.population) == 0):
                         return
-                    self.population.remove(bird)
 
                 for i, pipe in enumerate(self.pipes.upper):
                     if bird.crossed(pipe):
@@ -263,10 +258,11 @@ class Flappy:
             Create the new population and all of that.
         """
         print("AI agent lost. Restarting...")
-        print(f"POPULATION: {self.genetic_algorithm.get_population()}")
-        self.population = self.genetic_algorithm.generate_new_population(self.config)
-        # self.population = GeneticAlgorithm(population_size=NUMBER_OF_BIRDS, config=self.config)
-        # self.model_results.append(GameResult(self.score.score))
+        
+        print(f"Numerpo de población: {len(self.next_gen_population)}")
+        
+        self.genetic_algorithm.set_population(self.next_gen_population)
+        self.genetic_algorithm.generate_new_population()
 
         self.background.tick()
         self.floor.tick()
@@ -308,7 +304,7 @@ class Flappy:
         else:
             # AI player
             print("AI agent lost. Restarting...")
-            self.model_results.append(GameResult(self.score.score))
+            # self.model_results.append(GameResult(self.score.score))
 
             self.background.tick()
             self.floor.tick()

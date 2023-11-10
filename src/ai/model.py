@@ -31,7 +31,7 @@ class Model:
             loss="binary_crossentropy",
             metrics=["accuracy"],
         )
-        print(self.model.get_weights())
+        #print(self.model.get_weights())
 
     # Decides action based on game observation
     def predict(self, game_observation: GameObservation) -> GameAction:

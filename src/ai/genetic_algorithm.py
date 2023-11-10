@@ -8,10 +8,11 @@ class GeneticAlgorithm:
         self.mutation_rate = mutation_rate
         self.crossover_rate = crossover_rate
         self.population = []
-        self.scores = []
+        self.fitness = []
         self.max_generations = 50  # Define cuántas generaciones correr
         
         self.initialize_population(config)
+        
         
     def initialize_population(self, config):
         """
@@ -22,10 +23,13 @@ class GeneticAlgorithm:
         self.population = [Bird(config) for _ in range(self.population_size)]
 
     def get_population(self):
-        return copy(self.population)
+        return self.population
+    
+    def set_population(self, population):
+        self.population = population
 
     def evaluate_population(self):
-                # Actualiza el fitness de cada pájaro en la población basado en el score obtenido
+        # Actualiza el fitness de cada pájaro en la población basado en el score obtenido
         for bird in self.population:
             bird.fitness = bird.score  # Asumiendo que 'score' ya ha sido actualizado
 
@@ -39,7 +43,25 @@ class GeneticAlgorithm:
         # Selecciona los mejores individuos para la reproducción
         pass
 
-    def generate_new_population(self, config):
-        # Crea una nueva generación mediante cruzamiento y mutación
-        self.population = [Bird(config) for _ in range(self.population_size)]
-        return self.population
+
+    def calculate_fitness(self):
+        """
+        Calculates the fitness of each bird in the population.
+        """
+        for bird in self.population:
+            bird.calculate_fitness()
+    
+    
+    def generate_new_population(self):
+        self.calculate_fitness()
+
+
+    def migrate_population(self, bird, new_population):
+        """
+        Migrates the bird to the new population.
+
+        Replaces the bird in the current population with the bird in the new population.
+        [GAME LOOP]
+        """
+        self.population.remove(bird)
+        new_population.append(bird)
