@@ -1,5 +1,7 @@
+from .bird import Bird
+
 class GeneticAlgorithm:
-    def __init__(self, population_size, mutation_rate, crossover_rate):
+    def __init__(self, population_size, mutation_rate=0, crossover_rate=0):
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.crossover_rate = crossover_rate
@@ -7,8 +9,15 @@ class GeneticAlgorithm:
         self.scores = []
         self.max_generations = 50  # Define cuántas generaciones correr
 
-    def initialize_population(self):
-        pass
+    def initialize_population(self, config):
+        """
+        Initializes the population of birds for the genetic algorithm.
+
+        Creates a list of Bird objects with a length equal to the population size.
+        """
+        self.population = [Bird(config) for _ in range(self.population_size)]
+        return self.population
+
 
     def evaluate_population(self):
                 # Actualiza el fitness de cada pájaro en la población basado en el score obtenido

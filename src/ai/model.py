@@ -3,7 +3,6 @@ from enum import Enum
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.initializers import RandomNormal
 
 from .game_observation import GameObservation
 
@@ -45,5 +44,7 @@ class Model:
         action_probability = self.model.predict(observation)
         # Determine the action based on the probability
         action = GameAction.JUMP if action_probability > 0.5 else GameAction.DO_NOTHING
-        print(f"Action: {action.name}, Probability: {action_probability}")
+        
+        #print(f"Action: {action.name}, Probability: {action_probability}")
+        
         return action

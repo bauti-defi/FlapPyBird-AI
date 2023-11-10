@@ -8,17 +8,17 @@ from pygame.locals import K_ESCAPE, K_SPACE, K_UP, KEYDOWN, QUIT
 from .ai.game_observation import GameObservation
 from .ai.game_result import GameResult
 from .ai.model import GameAction, Model
-from .entities import (
+from .ai.genetic_algorithm import GeneticAlgorithm
+from .ai.entities import (
     Background,
     Floor,
     GameOver,
     Pipes,
-    Player,
     PlayerMode,
     Score,
     WelcomeMessage,
 )
-from .utils import GameConfig, Images, Sounds, Window
+from .ai.utils import GameConfig, Images, Sounds, Window
 
 NUMBER_OF_BIRDS = 10
 
@@ -52,7 +52,7 @@ class Flappy:
             False if len(sys.argv) > 1 and sys.argv[1] == "ai" else True
         )
         if not self.human_player:
-            self.models = [Model() for _ in range(NUMBER_OF_BIRDS)]
+
             self.model_results = []
 
 
@@ -61,12 +61,12 @@ class Flappy:
             self.background = Background(self.config)
             self.floor = Floor(self.config)
 
-            self.players = [Player(self.config, random_y=random.randint(-10, 10)) for _ in range(NUMBER_OF_BIRDS)]
+            self.score = Score(self.config)
+            self.population = GeneticAlgorithm(population_size=NUMBER_OF_BIRDS).initialize_population(self.config)
 
             self.welcome_message = WelcomeMessage(self.config)
             self.game_over_message = GameOver(self.config)
             self.pipes = Pipes(self.config)
-            self.score = Score(self.config)
 
             if not self.human_player:
                 print("Starting in AI mode")
@@ -117,22 +117,24 @@ class Flappy:
     async def agent_play_v2(self):
         self.score.reset()
 
-        for player in self.players:
-            player.set_mode(PlayerMode.NORMAL)
+        for bird in self.population:
+            bird.set_mode(PlayerMode.NORMAL)
         
         while True:
-            for player, model in zip(self.players, self.models):
+            for bird in self.population:
+                bird_model = bird.get_model()
+                bird_fitness = bird.get_fitness()
                 # the observation we will pass to the AI agent
                 observation = GameObservation(
-                    bird_y_pos=player.y,
-                    y_dist_to_bot_pipe=self.pipes.upper[0].y - player.y,
-                    y_dist_to_top_pipe=self.pipes.lower[0].y - player.y,
-                    x_dist_to_pipe_pair=self.pipes.upper[0].x -player.x,
-                    bird_y_vel=player.vel_y,
+                    bird_y_pos=bird.y,
+                    y_dist_to_bot_pipe=self.pipes.upper[0].y - bird.y,
+                    y_dist_to_top_pipe=self.pipes.lower[0].y - bird.y,
+                    x_dist_to_pipe_pair=self.pipes.upper[0].x -bird.x,
+                    bird_y_vel=bird.vel_y,
                 )
 
                 # Get agent decision
-                action = model.predict(observation)
+                action = bird_model.predict(observation)
 
                 # Perform action
                 if action == GameAction.JUMP and len(pygame.event.get()) == 0:
@@ -145,26 +147,26 @@ class Flappy:
                 ):
                     pygame.event.clear()
 
-                if player.collided(self.pipes, self.floor):
-                    if(len(self.players) == 1):
+                if bird.collided(self.pipes, self.floor):
+                    if(len(self.population) == 1):
                         return
-                    self.players.remove(player)
+                    self.population.remove(bird)
 
                 for i, pipe in enumerate(self.pipes.upper):
-                    if player.crossed(pipe):
-                        self.score.add()
+                    if bird.crossed(pipe):
+                        bird_fitness.add()
 
                 for event in pygame.event.get():
                     self.check_quit_event(event)
                     if self.is_tap_event(event):
-                        player.flap()
+                        bird.flap()
 
                 self.background.tick()
                 self.floor.tick()
                 self.pipes.tick()
                 self.score.tick()
-                for player in self.players:
-                    player.tick()
+                for bird in self.population:
+                    bird.tick()
 
                 pygame.display.update()
                 await asyncio.sleep(0)
