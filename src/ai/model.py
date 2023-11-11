@@ -60,10 +60,10 @@ class Model:
             Args:
                 filename (str): The name of the file to save the weights to.
         """
-        self.model.save_weights(f"model_pool/model_new_{filename}.keras")
+        self.model.save_weights(f"model_new_{filename}.keras", overwrite=True)
         
     def load_model(self, filename):
-        self.model.load_weights(f"model_pool/model_new_{filename}.keras")
+        self.model.load_weights(f"model_new_{filename}.keras")
     
     # Decides action based on game observation
     def predict(self, game_observation: GameObservation) -> GameAction:

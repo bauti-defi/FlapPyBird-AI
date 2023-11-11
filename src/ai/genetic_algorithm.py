@@ -3,7 +3,6 @@ from typing import List
 import numpy as np
 from .bird import Bird
 
-# TODO: el algoritmo debe aprender los pesos óptimos de la red neuronal para jugar el juego efectivamente.
 class GeneticAlgorithm:
     def __init__(self, population_size, config, mutation_rate=0, crossover_rate=0):
         self.population_size = population_size
@@ -24,6 +23,7 @@ class GeneticAlgorithm:
         Creates a list of Bird objects with a length equal to the population size.
         """
         self.population = [Bird(config) for _ in range(self.population_size)]
+        # self.load_generation()
 
     def get_population(self):
         return self.population
@@ -46,6 +46,27 @@ class GeneticAlgorithm:
 
         return parents
 
+    def select_parents_v2(self) -> List[Bird]:
+        """
+        Selecciona padres para la próxima generación utilizando el método de selección "Accept-Reject".
+        :return: Lista de padres seleccionados.
+        """
+        fitness_scores = [bird.get_fitness() for bird in self.population]
+        max_fitness = max(fitness_scores)
+        num_parents = len(self.population) // 2
+        selected_parents = []
+
+        while len(selected_parents) < num_parents:
+            # Elegir un individuo al azar
+            candidate_idx = np.random.randint(len(self.population))
+            # Generar un número aleatorio entre 0 y el máximo fitness
+            threshold = np.random.uniform(0, max_fitness)
+
+            # Aceptar el individuo si su fitness es mayor que el umbral
+            if fitness_scores[candidate_idx] >= threshold:
+                selected_parents.append(self.population[candidate_idx])
+
+        return selected_parents
 
     def calculate_fitness(self):
         """
@@ -103,8 +124,8 @@ class GeneticAlgorithm:
     def model_mutate_v2(self, weights):
         for xi in range(len(weights)):
             for yi in range(len(weights[xi])):
-                if np.random.uniform(0, 1) > 0.85:
-                    change = np.random.uniform(-0.5,0.5)
+                if np.random.uniform(0, 1) > 0.1:
+                    change = np.random.uniform(-0.125,0.125)
                     weights[xi][yi] += change
         return weights
 
@@ -135,7 +156,7 @@ class GeneticAlgorithm:
         self.calculate_fitness()
 
         # Paso 1: Seleccionar padres
-        parents = self.select_parents()
+        parents = self.select_parents_v2()
         # Paso 2: Crear la próxima generación
         new_population = []
         
@@ -164,7 +185,15 @@ class GeneticAlgorithm:
     
     def generate_new_population(self):
         self.generate_next_generation()
+        self.save_generation()
 
+    def save_generation(self):
+        for index, bird in enumerate(self.population):
+            bird.model.save_model(f"gen_{index}")
+            
+    def load_generation(self):
+        for index, bird in enumerate(self.population):
+            bird.model.load_model(f"gen_{index}")
 
     def migrate_population(self, bird, new_population):
         """
