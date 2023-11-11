@@ -63,7 +63,7 @@ class Bird(Player):
         # Weights for the score and time alive
         # These values can be adjusted to change the relative importance of each factor
         weight_for_score = 1.0
-        weight_for_time_alive = 0.1
+        weight_for_time_alive = 0.5
 
         # Calculate the fitness as a weighted combination of the score and time alive
         score = self.score.get_game_score()

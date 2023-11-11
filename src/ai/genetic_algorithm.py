@@ -124,8 +124,8 @@ class GeneticAlgorithm:
     def model_mutate_v2(self, weights):
         for xi in range(len(weights)):
             for yi in range(len(weights[xi])):
-                if np.random.uniform(0, 1) > 0.1:
-                    change = np.random.uniform(-0.125,0.125)
+                if np.random.uniform(0, 1) > 0.80: # 20% chance of mutation
+                    change = np.random.uniform(-0.5,0.5)
                     weights[xi][yi] += change
         return weights
 

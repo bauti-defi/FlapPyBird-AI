@@ -28,7 +28,7 @@ class Model:
         # Compile the model with the Adam optimizer and a loss function for binary outcomes(0 or 1 - jump or don't jump)
         self.model.compile(
             optimizer=Adam(learning_rate=0.001),
-            loss="sparse_categorical_crossentropy",
+            loss="binary_crossentropy",
             metrics=["accuracy"],
         )
 
