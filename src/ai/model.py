@@ -47,8 +47,6 @@ class Model:
     def load_model(self, filename):
         self.model.load_weights("Current_Model_Pool/model_new" + ".keras")
     
-
-    
     # Decides action based on game observation
     def predict(self, game_observation: GameObservation) -> GameAction:
         # Preprocess observation into the format the model expects (a batch of one observation)
