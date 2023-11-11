@@ -44,7 +44,7 @@ class Bird(Player):
     def get_alive(self):
         return self.is_alive
     
-    def get_model(self):
+    def get_model_instance(self):
         return self.model
     
     def get_score(self):
@@ -67,4 +67,6 @@ class Bird(Player):
         # Calculate the fitness as a weighted combination of the score and time alive
         score = self.score.get_game_score()
         self.fitness = (weight_for_score * score) + (weight_for_time_alive * self.time_alive)
-        
+    
+    def get_fitness(self):
+        return self.fitness

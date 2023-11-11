@@ -18,7 +18,7 @@ from .ai.entities import (
 )
 from .ai.utils import GameConfig, Images, Sounds, Window
 
-NUMBER_OF_BIRDS = 10
+NUMBER_OF_BIRDS = 5
 
 class Flappy:
     def __init__(self):
@@ -122,7 +122,7 @@ class Flappy:
         while True:
             for bird in self.population:
                 
-                bird_model = bird.get_model()
+                bird_model = bird.get_model_instance()
                 bird_score = bird.get_score()
                 # the observation we will pass to the AI agent
                 observation = GameObservation(

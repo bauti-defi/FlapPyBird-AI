@@ -31,8 +31,13 @@ class Model:
             loss="binary_crossentropy",
             metrics=["accuracy"],
         )
-        #print(self.model.get_weights())
 
+    def get_model(self):
+        return self.model
+    
+    def set_weights(self, weights):
+        self.model.set_weights(weights)
+    
     # Decides action based on game observation
     def predict(self, game_observation: GameObservation) -> GameAction:
         # Preprocess observation into the format the model expects (a batch of one observation)
