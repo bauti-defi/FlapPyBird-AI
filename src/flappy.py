@@ -259,8 +259,6 @@ class Flappy:
         """
         print("AI agent lost. Restarting...")
         
-        print(f"Numerpo de población: {len(self.next_population)}")
-        
         self.ga.set_population(self.next_population)
         self.ga.generate_new_population()
 

@@ -1,4 +1,4 @@
-from copy import copy
+from typing import List
 
 import numpy as np
 from .bird import Bird
@@ -31,28 +31,11 @@ class GeneticAlgorithm:
     def set_population(self, population):
         self.population = population
 
-    def evaluate_population(self):
-        # Actualiza el fitness de cada pájaro en la población basado en el score obtenido
-        for bird in self.population:
-            bird.fitness = bird.score  # Asumiendo que 'score' ya ha sido actualizado
-
-        # Si ninguna ave logró cruzar una tubería, entonces todas tienen fitness 0
-        if all(bird.fitness == 0 for bird in self.population):
-            # Podrías querer hacer algo especial aquí, como aumentar la tasa de mutación
-            for bird in self.population:
-                bird.fitness = 1  # Asignar un fitness mínimo para mantener la diversidad
-
-    def select_parents(self):
+    def select_parents(self) -> List[Bird]:
         """
             Selecciona padres para la próxima generación utilizando el método de selección elitista.
-
-            :param population: Lista de aves (instancias de la clase que contiene calculate_fitness y get_fitness).
             :return: Lista de padres seleccionados.
         """
-
-        # Calcula la aptitud para cada ave en la población
-        for bird in self.population:
-            bird.calculate_fitness()
 
         # Ordena la población por su aptitud (de mayor a menor)
         sorted_population = sorted(self.population, key=lambda bird: bird.get_fitness(), reverse=True)
@@ -72,7 +55,7 @@ class GeneticAlgorithm:
             bird.calculate_fitness()
     
 
-    def crossover(self, parent1, parent2):
+    def crossover(self, parent1: Bird, parent2: Bird):
         """
             Realiza el cruce de un punto en los pesos de dos redes neuronales.
 
@@ -80,10 +63,10 @@ class GeneticAlgorithm:
             :param parent2: El segundo modelo de red neuronal (padre).
             :return: Dos nuevos conjuntos de pesos (para dos hijos).
         """
-
+        
         # Obtener los pesos de los padres
-        weights1 = parent1.get_model_instance().get_model().get_weights()
-        weights2 = parent2.get_model_instance().get_model().get_weights()
+        weights1 = parent1.model.get_model_weights()
+        weights2 = parent2.model.get_model_weights()
 
         # Asegurarse de que los padres tengan la misma estructura de pesos
         assert len(weights1) == len(weights2)
@@ -117,45 +100,69 @@ class GeneticAlgorithm:
             mutated_weights.append(mutated_weight_matrix)
         return mutated_weights
 
+    def model_mutate_v2(self, weights):
+        for xi in range(len(weights)):
+            for yi in range(len(weights[xi])):
+                if np.random.uniform(0, 1) > 0.85:
+                    change = np.random.uniform(-0.5,0.5)
+                    weights[xi][yi] += change
+        return weights
+
+    def model_crossover_v2(self, model1, model2):
+        weights1 = model1.model.get_model_weights()
+        weights2 = model2.model.get_model_weights()
+        new_weights1 = []
+        new_weights2 = []
+        for w1, w2 in zip(weights1, weights2):
+            if len(w1.shape) == 2:  # If weight is for Dense layer
+                idx = np.random.randint(0, w1.shape[0])
+                new_w1 = np.vstack((w1[:idx, :], w2[idx:, :]))
+                new_w2 = np.vstack((w2[:idx, :], w1[idx:, :]))
+                new_weights1.append(new_w1)
+                new_weights2.append(new_w2)
+            else:  # Bias or other types of layers
+                new_weights1.append(w1)
+                new_weights2.append(w2)
+        return new_weights1, new_weights2
+        
 
     def generate_next_generation(self):
         """
         Genera la próxima generación a partir de la población actual.
-
-        :param current_population: La población actual de modelos de red neuronal.
-        :return: La nueva generación de modelos.
         """
+        
+        # Calculo el fitness
+        self.calculate_fitness()
 
         # Paso 1: Seleccionar padres
         parents = self.select_parents()
-
         # Paso 2: Crear la próxima generación
         new_population = []
+        
         while len(new_population) < len(self.population):
             # Selecciona dos padres al azar para el cruce
             parent1, parent2 = np.random.choice(parents, 2, replace=False)
 
             # Realiza el cruce para crear dos hijos
-            child1_weights, child2_weights = self.crossover(parent1, parent2)
+            child1_weights, child2_weights = self.model_crossover_v2(parent1, parent2)
 
             # Aplica la mutación a los pesos de los hijos
-            child1_weights = self.mutate(child1_weights)
-            child2_weights = self.mutate(child2_weights)
+            child1_weights = self.model_mutate_v2(child1_weights)
+            child2_weights = self.model_mutate_v2(child2_weights)
         
             # Crea nuevos modelos para los hijos y añádelos a la nueva población
             child1 = Bird(self.config)
-            child1.get_model_instance().set_model_weights(child1_weights)
+            child1.model.set_model_weights(child1_weights)
             new_population.append(child1)
 
             child2 = Bird(self.config)
-            child2.get_model_instance().set_model_weights(child2_weights)
+            child2.model.set_model_weights(child2_weights)
             
             new_population.append(child2)
 
         self.population = new_population
     
     def generate_new_population(self):
-        self.calculate_fitness()
         self.generate_next_generation()
 
 

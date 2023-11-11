@@ -17,7 +17,7 @@ class Model:
         self.model = Sequential(
             [
                 layers.Dense(
-                    10, activation="sigmoid", input_shape=(5,)
+                    10, activation="relu", input_shape=(5,)
                 ),  # Hidden layer with 10 neurons, and input shape of 5 (number of observation variables)
                 layers.Dense(
                     1, activation="sigmoid"
@@ -27,8 +27,8 @@ class Model:
 
         # Compile the model with the Adam optimizer and a loss function for binary outcomes(0 or 1 - jump or don't jump)
         self.model.compile(
-            optimizer=SGD(lr=0.01, momentum=0.9, nesterov=True),
-            loss="mse",
+            optimizer=Adam(learning_rate=0.001),
+            loss="sparse_categorical_crossentropy",
             metrics=["accuracy"],
         )
 
@@ -51,7 +51,7 @@ class Model:
         """
             Returns the weights of the neural network model.
         """
-        self.model.get_weights()
+        return self.model.get_weights()
         
     def save_model(self, filename):
         """
