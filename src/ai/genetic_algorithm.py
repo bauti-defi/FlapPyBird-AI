@@ -9,12 +9,11 @@ class GeneticAlgorithm:
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.crossover_rate = crossover_rate
-        self.population = []
-        self.fitness = []
-        self.max_generations = 50  # Define cuántas generaciones correr
-        
         self.config = config
         
+        self.population = []
+        self.fitness = []
+
         self.initialize_population(self.config)
         
         
@@ -98,7 +97,7 @@ class GeneticAlgorithm:
 
         return child1_weights, child2_weights
 
-    def mutate(self, weights, mutation_rate=0.01, mutation_scale=0.1):
+    def mutate(self, weights, mutation_rate=0.1, mutation_scale=0.1):
         """
         Aplica una mutación a los pesos de una red neuronal.
 
@@ -145,11 +144,11 @@ class GeneticAlgorithm:
         
             # Crea nuevos modelos para los hijos y añádelos a la nueva población
             child1 = Bird(self.config)
-            child1.get_model_instance().set_weights(child1_weights)
+            child1.get_model_instance().set_model_weights(child1_weights)
             new_population.append(child1)
 
             child2 = Bird(self.config)
-            child2.get_model_instance().set_weights(child2_weights)
+            child2.get_model_instance().set_model_weights(child2_weights)
             
             new_population.append(child2)
 

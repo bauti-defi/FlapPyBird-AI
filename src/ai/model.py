@@ -27,7 +27,7 @@ class Model:
 
         # Compile the model with the Adam optimizer and a loss function for binary outcomes(0 or 1 - jump or don't jump)
         self.model.compile(
-            optimizer=SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True),
+            optimizer=SGD(lr=0.01, momentum=0.9, nesterov=True),
             loss="mse",
             metrics=["accuracy"],
         )

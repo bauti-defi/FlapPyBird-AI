@@ -23,11 +23,12 @@ class Bird(Player):
     """
     def __init__(self, config) -> None:
         super().__init__(config, random_y=random.randint(-10, 10))
+
         self.model = Model()
-        self.fitness = 0
         
         self.score = GameScore(config)
         self.time_alive = 0
+        self.fitness = 0
 
         self.is_alive = True
         

@@ -18,7 +18,7 @@ from .ai.entities import (
 )
 from .ai.utils import GameConfig, Images, Sounds, Window
 
-NUMBER_OF_BIRDS = 5
+NUMBER_OF_BIRDS = 10
 
 class Flappy:
     def __init__(self):
@@ -50,8 +50,7 @@ class Flappy:
             False if len(sys.argv) > 1 and sys.argv[1] == "ai" else True
         )
         if not self.human_player:
-            self.genetic_algorithm = GeneticAlgorithm(population_size=NUMBER_OF_BIRDS, config=self.config)
-            self.model_results = []
+            self.ga = GeneticAlgorithm(population_size=NUMBER_OF_BIRDS, config=self.config)
 
 
     async def start(self):
@@ -61,8 +60,8 @@ class Flappy:
             
             self.score = Score(self.config)
 
-            self.population = self.genetic_algorithm.get_population()
-            self.next_gen_population = []
+            self.population = self.ga.get_population()
+            self.next_population = []
             
             self.welcome_message = WelcomeMessage(self.config)
             self.game_over_message = GameOver(self.config)
@@ -116,16 +115,16 @@ class Flappy:
 
     async def agent_play_v2(self):
         for bird in self.population:
-            bird.start_flying()
             bird.set_mode(PlayerMode.NORMAL)
         
         while True:
             for bird in self.population:
-                
+                bird.start_flying()
                 bird_model = bird.get_model_instance()
                 bird_score = bird.get_score()
+                
                 # the observation we will pass to the AI agent
-                observation = GameObservation(
+                self.observation = GameObservation(
                     bird_y_pos=bird.y,
                     y_dist_to_bot_pipe=self.pipes.upper[0].y - bird.y,
                     y_dist_to_top_pipe=self.pipes.lower[0].y - bird.y,
@@ -134,7 +133,7 @@ class Flappy:
                 )
 
                 # Get agent decision
-                action = bird_model.predict(observation)
+                action = bird_model.predict(self.observation)
 
                 # Perform action
                 if action == GameAction.JUMP and len(pygame.event.get()) == 0:
@@ -147,10 +146,11 @@ class Flappy:
                 ):
                     pygame.event.clear()
 
+                # Checks if the bird collided with the pipes or the floor
                 if bird.collided(self.pipes, self.floor):
                     bird.stop_flying()
-                    self.genetic_algorithm.migrate_population(bird, self.next_gen_population)
-                    if(len(self.population) == 0):
+                    self.ga.migrate_population(bird, self.next_population)
+                    if(len(self.next_population) == NUMBER_OF_BIRDS):
                         return
 
                 for i, pipe in enumerate(self.pipes.upper):
@@ -259,10 +259,10 @@ class Flappy:
         """
         print("AI agent lost. Restarting...")
         
-        print(f"Numerpo de población: {len(self.next_gen_population)}")
+        print(f"Numerpo de población: {len(self.next_population)}")
         
-        self.genetic_algorithm.set_population(self.next_gen_population)
-        self.genetic_algorithm.generate_new_population()
+        self.ga.set_population(self.next_population)
+        self.ga.generate_new_population()
 
         self.background.tick()
         self.floor.tick()
