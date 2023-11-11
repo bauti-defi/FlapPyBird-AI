@@ -33,22 +33,49 @@ class Model:
         )
 
     def get_model(self):
+        """
+            Returns the neural network model used by the AI agent.
+        """
         return self.model
     
     def set_model_weights(self, weights):
+        """
+            Set the weights of the model.
+
+            Args:
+                weights (list): A list of numpy arrays representing the weights of the model.
+        """
         self.model.set_weights(weights)
         
     def get_model_weights(self):
+        """
+            Returns the weights of the neural network model.
+        """
         self.model.get_weights()
         
     def save_model(self, filename):
-        self.model.save_weights("Current_Model_Pool/model_new" + ".keras")
+        """
+            Saves the weights of the model to a file.
+
+            Args:
+                filename (str): The name of the file to save the weights to.
+        """
+        self.model.save_weights(f"model_pool/model_new_{filename}.keras")
         
     def load_model(self, filename):
-        self.model.load_weights("Current_Model_Pool/model_new" + ".keras")
+        self.model.load_weights(f"model_pool/model_new_{filename}.keras")
     
     # Decides action based on game observation
     def predict(self, game_observation: GameObservation) -> GameAction:
+        """
+            Predicts the next action to take based on the current game observation.
+
+            Args:
+                game_observation (GameObservation): The current game observation.
+
+            Returns:
+                GameAction: The predicted action to take.
+        """
         # Preprocess observation into the format the model expects (a batch of one observation)
         observation = game_observation.as_vector().reshape(
             1, -1
