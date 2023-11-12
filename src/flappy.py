@@ -34,7 +34,7 @@ class Flappy:
             fps=30,
             window=window,
             images=images,
-            sounds=Sounds(),
+            # sounds=Sounds(),
         )
 
         self.human_player = (

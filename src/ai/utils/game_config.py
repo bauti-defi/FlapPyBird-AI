@@ -15,14 +15,14 @@ class GameConfig:
         fps: int,
         window: Window,
         images: Images,
-        sounds: Sounds,
+        # sounds: Sounds,
     ) -> None:
         self.screen = screen
         self.clock = clock
         self.fps = fps
         self.window = window
         self.images = images
-        self.sounds = sounds
+        # self.sounds = sounds
         self.debug = os.environ.get("DEBUG", False)
 
     def tick(self) -> None:
