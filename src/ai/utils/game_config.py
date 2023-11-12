@@ -15,7 +15,7 @@ class GameConfig:
         fps: int,
         window: Window,
         images: Images,
-        sounds: Sounds,
+        sounds: Sounds = None,
     ) -> None:
         self.screen = screen
         self.clock = clock
