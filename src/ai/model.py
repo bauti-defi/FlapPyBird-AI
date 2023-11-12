@@ -22,6 +22,7 @@ class Model:
                 layers.Dense(
                     10, activation="relu", input_shape=(5,)
                 ),  # Hidden layer with 10 neurons, and input shape of 5 (number of observation variables)
+                #layers.Dense(10, activation="relu"),  # Segunda capa oculta, opcional
                 layers.Dense(
                     2, activation="softmax"
                 ),  # Output layer with 2 neurons (number of actions)
@@ -30,11 +31,25 @@ class Model:
 
         # Compile the model with the Adam optimizer and a loss function for categorical outcomes
         self.model.compile(
-            optimizer=Adam(learning_rate=0.001),
+            optimizer=Adam(learning_rate=0.01),
             loss="sparse_categorical_crossentropy",
             metrics=["accuracy"],
         )
 
+    def get_weights(self):
+        """
+            Returns the weights of the neural network model.
+        """
+        return self.model.get_weights()
+    
+    def set_weights(self, weights):
+        """
+            Set the weights of the model.
+            Args:
+                weights (list): A list of numpy arrays representing the weights of the model.
+        """
+        self.model.set_weights(weights)
+        
     # Decides action based on game observation
     def predict(self, game_observation: GameObservation) -> GameAction:
         # Preprocess observation into the format the model expects (a batch of one observation)

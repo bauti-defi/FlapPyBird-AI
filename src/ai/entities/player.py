@@ -34,16 +34,20 @@ class Player(Entity):
         self.mode = mode
         if mode == PlayerMode.NORMAL:
             self.reset_vals_normal()
-            self.config.sounds.wing.play()
+            #self.config.sounds.wing.play()
         elif mode == PlayerMode.SHM:
             self.reset_vals_shm()
         elif mode == PlayerMode.CRASH:
             self.stop_wings()
-            self.config.sounds.hit.play()
+            #self.config.sounds.hit.play()
             if self.crash_entity == "pipe":
-                self.config.sounds.die.play()
+                pass
+                #self.config.sounds.die.play()
             self.reset_vals_crash()
-
+            
+    def get_mode(self) -> PlayerMode:
+        return self.mode
+    
     def reset_vals_normal(self) -> None:
         self.vel_y = -9  # player's velocity along Y axis
         self.max_vel_y = 10  # max vel along Y, max descend speed
@@ -139,7 +143,7 @@ class Player(Entity):
             self.vel_y = self.flap_acc
             self.flapped = True
             self.rot = 80
-            self.config.sounds.wing.play()
+            # self.config.sounds.wing.play()
 
     def crossed(self, pipe: Pipe) -> bool:
         return pipe.cx <= self.cx < pipe.cx - pipe.vel_x
