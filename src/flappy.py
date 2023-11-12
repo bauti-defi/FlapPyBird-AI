@@ -75,13 +75,15 @@ class Flappy:
         while True:
             for bird in self.population:
                 bird.start_flying()
+
+                next_upper, next_lower = self.pipes.get_next_pipe(bird.x)
             
                 # the observation we will pass to the AI agent
                 self.observation = GameObservation(
                     bird_y_pos=bird.y,
-                    y_dist_to_bot_pipe=self.pipes.upper[0].y - bird.y,
-                    y_dist_to_top_pipe=self.pipes.lower[0].y - bird.y,
-                    x_dist_to_pipe_pair=self.pipes.upper[0].x - bird.x,
+                    y_dist_to_bot_pipe=next_upper.y - bird.y,
+                    y_dist_to_top_pipe=next_lower.y - bird.y,
+                    x_dist_to_pipe_pair=next_upper.x - bird.x,
                     bird_y_vel=bird.vel_y,
                 )
 
