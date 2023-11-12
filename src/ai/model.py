@@ -23,16 +23,20 @@ class Model:
                     10, activation="relu", input_shape=(5,)
                 ),  # Hidden layer with 10 neurons, and input shape of 5 (number of observation variables)
                 #layers.Dense(10, activation="relu"),  # Segunda capa oculta, opcional
+                #layers.Dense(
+                #    2, activation="softmax"
+                #),  # Output layer with 2 neurons (number of actions)
                 layers.Dense(
-                    2, activation="softmax"
+                    1, activation="sigmoid"
                 ),  # Output layer with 2 neurons (number of actions)
             ]
         )
 
         # Compile the model with the Adam optimizer and a loss function for categorical outcomes
         self.model.compile(
-            optimizer=Adam(learning_rate=0.01),
-            loss="sparse_categorical_crossentropy",
+            optimizer=Adam(learning_rate=0.001),
+            # loss="sparse_categorical_crossentropy",
+            loss="binary_crossentropy",
             metrics=["accuracy"],
         )
 
@@ -56,9 +60,13 @@ class Model:
         observation = game_observation.as_vector().reshape(
             1, -1
         )  # Reshape the observation to be a batch of one
+        
         # Get the model's prediction
-        action_probabilities = self.model.predict(observation)
+        #action_probabilities = self.model.predict(observation)
         # Determine the action based on the highest probability
-        action = GameAction(np.argmax(action_probabilities[0]))
+        #action = GameAction(np.argmax(action_probabilities[0]))
+
+        action_probability = self.model.predict(observation)
+        action = GameAction.JUMP if action_probability > 0.5 else GameAction.DO_NOTHING
 
         return action
