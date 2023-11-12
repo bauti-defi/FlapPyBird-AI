@@ -1,5 +1,11 @@
 import numpy as np
 
+def gaussian_mutation(weights, mutation_rate=0.15, sigma=0.5):
+    for i in range(len(weights)):
+        if np.random.rand() < mutation_rate:
+            weights[i] += np.random.normal(0, sigma)
+    return weights
+
 
 def gaussian_weight_mutation(network, mutation_rate, scale=0.1):
     """
