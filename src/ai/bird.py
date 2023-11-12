@@ -14,14 +14,9 @@ class Bird(Player):
 
         self.model = Model()
         self.score = 0
-        self.time_alive = 0
+        self.ticks = 0
         self.fitness = 0
-        
-    def start_flying(self):
-        self.time_alive = time.time()
-
-    def stop_flying(self):
-        self.time_alive = time.time() - self.time_alive
+        self.events = []
     
     def reset_score(self) -> None:
         self.score = 0
@@ -47,3 +42,11 @@ class Bird(Player):
 
     def get_fitness(self):
         return self.fitness
+    
+    def tick(self):
+        super(Player, self).tick()
+        self.ticks += 1
+
+    def reset(self):
+        super(Player, self).reset()
+        self.ticks = 0

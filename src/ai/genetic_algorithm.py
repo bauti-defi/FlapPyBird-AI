@@ -89,6 +89,9 @@ class GeneticAlgorithm:
         
         # Paso 2: Seleccionar padres
         parents = self.select_parents()
+
+        # for p in parents:
+        #     if p.calculate_fitness() <
         
         # Paso 3: Crear la próxima generación
         new_population = []
