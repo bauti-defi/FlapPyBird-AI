@@ -28,6 +28,14 @@ class Pipes(Entity):
         self.lower = []
         self.spawn_initial_pipes()
 
+    def get_next_pipe(self, current_x: int):
+        for upper, lower in zip(self.upper, self.lower):
+            if upper.x > current_x and lower.x > current_x:
+                return upper, lower
+
+        return None
+
+
     def tick(self) -> None:
         if self.can_spawn_pipes():
             self.spawn_new_pipes()
