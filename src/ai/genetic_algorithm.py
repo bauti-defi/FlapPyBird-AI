@@ -2,7 +2,7 @@ import numpy as np
 from typing import List
 
 from .bird import Bird
-from .selection import roulette_wheel_selection
+from .selection import rank_selection, roulette_wheel_selection
 
 
 class GeneticAlgorithm:
@@ -87,7 +87,7 @@ class GeneticAlgorithm:
         self.calculate_fitness()
         
         # Paso 2: Seleccionar padres
-        parents = roulette_wheel_selection(self.population, self.fitness)
+        parents = rank_selection(self.population, self.fitness)
         
         # Paso 3: Crear la próxima generación
         new_population = []

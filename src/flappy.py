@@ -6,7 +6,7 @@ from pygame.locals import K_ESCAPE, K_SPACE, K_UP, KEYDOWN, QUIT
 
 from .ai.game_observation import GameObservation
 from .ai.genetic_algorithm import GeneticAlgorithm
-from .ai.model import GameAction, Model
+from .ai.model import GameAction
 from .ai.bird import Bird
 from .ai.entities import (
     Background,
@@ -17,7 +17,7 @@ from .ai.entities import (
     Score,
     WelcomeMessage,
 )
-from .ai.utils import GameConfig, Images, Sounds, Window
+from .ai.utils import GameConfig, Images, Window
 
 BIRD_NUMBER = 10
 class Flappy:
