@@ -1,5 +1,15 @@
 import numpy as np
 
+def model_crossover(model_idx1, model_idx2):
+    global current_pool
+    weights1 = current_pool[model_idx1].get_weights()
+    weights2 = current_pool[model_idx2].get_weights()
+    weightsnew1 = weights1
+    weightsnew2 = weights2
+    weightsnew1[0] = weights2[0]
+    weightsnew2[0] = weights1[0]
+    return np.asarray([weightsnew1, weightsnew2])
+
 
 def single_point_crossover(parent1, parent2):
     """

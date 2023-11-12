@@ -3,7 +3,7 @@ from typing import List
 
 from .bird import Bird
 from .selection import mating_pool, roulette_wheel_selection
-from .mutations import gaussian_mutation
+from .mutations import gaussian_mutation, model_mutate
 
 
 class GeneticAlgorithm:
@@ -101,8 +101,8 @@ class GeneticAlgorithm:
             child1_weights, child2_weights = self.crossover(parent1, parent2)
 
             # # Aplica la mutación a los pesos de los hijos
-            child1_weights = self.mutate(child1_weights)
-            child2_weights = self.mutate(child2_weights)
+            child1_weights = model_mutate(child1_weights)
+            child2_weights = model_mutate(child2_weights)
 
             # Crea nuevos modelos para los hijos y añádelos a la nueva población
             child1 = Bird(self.config)

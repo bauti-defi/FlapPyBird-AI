@@ -1,5 +1,13 @@
 import numpy as np
 
+def model_mutate(weights):
+    for xi in range(len(weights)):
+        for yi in range(len(weights[xi])):
+            if np.random.uniform(0, 1) > 0.85:
+                change = np.random.uniform(-0.125,0.125)
+                weights[xi][yi] += change
+    return weights
+
 def gaussian_mutation(weights, mutation_rate=0.15, sigma=0.5):
     for i in range(len(weights)):
         if np.random.rand() < mutation_rate:

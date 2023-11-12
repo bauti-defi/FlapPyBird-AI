@@ -4,7 +4,7 @@ import numpy as np
 from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers.legacy import SGD
 
 from .game_observation import GameObservation
 
@@ -20,23 +20,23 @@ class Model:
         self.model = Sequential(
             [
                 layers.Dense(
-                    10, activation="relu", input_shape=(5,)
+                    units=7, activation="relu", input_shape=(5,), 
                 ),  # Hidden layer with 10 neurons, and input shape of 5 (number of observation variables)
                 #layers.Dense(10, activation="relu"),  # Segunda capa oculta, opcional
                 #layers.Dense(
                 #    2, activation="softmax"
                 #),  # Output layer with 2 neurons (number of actions)
                 layers.Dense(
-                    1, activation="sigmoid"
+                    units=1, activation="sigmoid"
                 ),  # Output layer with 2 neurons (number of actions)
             ]
         )
 
         # Compile the model with the Adam optimizer and a loss function for categorical outcomes
         self.model.compile(
-            optimizer=Adam(learning_rate=0.001),
+            optimizer=SGD(learning_rate=0.01, decay=1e-6, momentum=0.9, nesterov=True),
             # loss="sparse_categorical_crossentropy",
-            loss="binary_crossentropy",
+            loss="mse",
             metrics=["accuracy"],
         )
 
