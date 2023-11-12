@@ -41,3 +41,34 @@ def truncation_selection(population, fitnesses, top_percentage=0.5):
     sorted_population = sorted(zip(fitnesses, population), key=lambda pair: pair[0], reverse=True)
     top_individuals = [x for _, x in sorted_population[:cutoff]]
     return np.random.choice(top_individuals, size=2, replace=False)
+
+def natural_selection(self):
+    # Clear the list
+    self.mating_pool = []
+
+    max_fitness = 0
+    for i in range(len(self.population)):
+        if self.population[i].fitness > max_fitness:
+            max_fitness = self.population[i].fitness
+
+    # Based on fitness, each member will get added to the mating pool a certain number of times
+    # a higher fitness = more entries to mating pool = more likely to be picked as a parent
+    # a lower fitness = fewer entries to mating pool = less likely
+    
+    
+
+def create_mating_pool(population, fitnesses, pool_size):
+    mating_pool = []
+    max_fitness = max(fitnesses)
+    
+    for individual, fitness in zip(population, fitnesses):
+        # Normalizar el fitness y usarlo para determinar el número de veces que cada individuo
+        # aparece en el mating pool
+        num_entries = int((fitness / max_fitness) * pool_size)
+        mating_pool.extend([individual] * num_entries)
+    
+    return mating_pool
+
+def select_parents_from_mating_pool(mating_pool, num_parents=2):
+    return np.random.choice(mating_pool, size=num_parents, replace=False)
+

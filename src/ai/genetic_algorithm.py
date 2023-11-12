@@ -2,13 +2,14 @@ import numpy as np
 from typing import List
 
 from .bird import Bird
+from .selection import roulette_wheel_selection
 
 
 class GeneticAlgorithm:
     def __init__(self, config):
         self.config = config
         self.population = []
-        self.fitness = 0
+        self.fitness = []
     
     def set_population(self, new_population):
         self.population = new_population
@@ -22,17 +23,18 @@ class GeneticAlgorithm:
         """
         for bird in self.population:
             bird.calculate_fitness()
+            self.fitness.append(bird.get_fitness())
     
     def select_parents(self) -> List[Bird]:
         """
             Selecciona padres para la próxima generación utilizando el método de selección elitista.
             :return: Lista de padres seleccionados.
         """
-
         # Ordena la población por su aptitud (de mayor a menor)
         sorted_population = sorted(self.population, key=lambda bird: bird.get_fitness(), reverse=True)
         # Selecciona los mejores individuos para ser padres (por ejemplo, la mitad superior)
         num_parents = len(self.population) // 2
+        
         parents = sorted_population[:num_parents]
 
         return parents
@@ -85,7 +87,7 @@ class GeneticAlgorithm:
         self.calculate_fitness()
         
         # Paso 2: Seleccionar padres
-        parents = self.select_parents()
+        parents = roulette_wheel_selection(self.population, self.fitness)
         
         # Paso 3: Crear la próxima generación
         new_population = []
@@ -115,4 +117,5 @@ class GeneticAlgorithm:
         
         
     def get_new_generation(self):
+        self.fitness = []
         self.create_new_generation()
