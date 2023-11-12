@@ -5,7 +5,7 @@ import pygame
 from pygame.locals import K_ESCAPE, K_SPACE, K_UP, KEYDOWN, QUIT
 
 from .ai.game_observation import GameObservation
-from .ai.game_result import GameResult
+from .ai.genetic_algorithm import GeneticAlgorithm
 from .ai.model import GameAction, Model
 from .ai.bird import Bird
 from .ai.entities import (
@@ -41,6 +41,8 @@ class Flappy:
             False if len(sys.argv) > 1 and sys.argv[1] == "ai" else True
         )
         if not self.human_player:
+            self.ga = GeneticAlgorithm()
+            self.ga.set_population([Bird(self.config) for _ in range(10)])
             self.model_results = []
 
     async def start(self):
@@ -48,7 +50,7 @@ class Flappy:
             self.background = Background(self.config)
             self.floor = Floor(self.config)
             self.player = Bird(self.config)
-            self.population = [Bird(self.config) for _ in range(10)]
+            self.population = self.ga.get_population()
             self.death_population = []
             
             self.welcome_message = WelcomeMessage(self.config)
@@ -69,6 +71,7 @@ class Flappy:
         # self.score.reset()
         for bird in self.population:
             bird.set_mode(PlayerMode.NORMAL)
+            bird.start_flying()
 
         while True:
             for bird in self.population:
@@ -97,6 +100,7 @@ class Flappy:
                     pygame.event.clear()
 
                 if bird.collided(self.pipes, self.floor):
+                    bird.stop_flying()
                     # Remove bird from population
                     self.population.remove(bird)
                     self.death_population.append(bird)
@@ -107,6 +111,7 @@ class Flappy:
 
                 for i, pipe in enumerate(self.pipes.upper):
                     if bird.crossed(pipe):
+                        bird.score.add()
                         self.score.add()
 
                 for event in pygame.event.get():
@@ -215,8 +220,10 @@ class Flappy:
         else:
             # AI player
             print("AI agent lost. Restarting...")
-            self.model_results.append(GameResult(self.score.score))
-
+            
+            self.ga.set_population(self.death_population)
+            self.ga.get_new_generation()
+            
             self.background.tick()
             self.floor.tick()
             self.pipes.tick()
@@ -227,4 +234,4 @@ class Flappy:
 
             self.config.tick()
             pygame.display.update()
-            await asyncio.sleep(0)
+            await asyncio.sleep(1)
