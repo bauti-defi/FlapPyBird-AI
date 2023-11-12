@@ -4,14 +4,16 @@ import numpy as np
 from .bird import Bird
 
 class GeneticAlgorithm:
-    def __init__(self, population_size, config, mutation_rate=0, crossover_rate=0):
+    def __init__(self, population_size, config, mutation_rate=0.05, mutation_scale=0.125, crossover_rate=0):
         self.population_size = population_size
         self.mutation_rate = mutation_rate
+        self.mutation_scale= mutation_scale
         self.crossover_rate = crossover_rate
         self.config = config
         
         self.population = []
-        self.fitness = []
+        self.fitness = 0
+        self.prev_fitness = 0
 
         self.initialize_population(self.config)
         
@@ -28,8 +30,8 @@ class GeneticAlgorithm:
     def get_population(self):
         return self.population
     
-    def set_population(self, population):
-        self.population = population
+    def set_population(self, new_population):
+        self.population = new_population
 
     def select_parents(self) -> List[Bird]:
         """
@@ -74,6 +76,7 @@ class GeneticAlgorithm:
         """
         for bird in self.population:
             bird.calculate_fitness()
+            self.fitness = self.fitness + bird.get_fitness()
     
 
     def crossover(self, parent1: Bird, parent2: Bird):
@@ -124,11 +127,22 @@ class GeneticAlgorithm:
     def model_mutate_v2(self, weights):
         for xi in range(len(weights)):
             for yi in range(len(weights[xi])):
-                if np.random.uniform(0, 1) > 0.80: # 20% chance of mutation
-                    change = np.random.uniform(-0.5,0.5)
+                if np.random.uniform(0, 1) < self.mutation_rate:  # Probabilidad de mutación
+                    change = np.random.uniform(-self.mutation_scale, self.mutation_scale)
                     weights[xi][yi] += change
         return weights
 
+    def adjust_mutation_scale_rate(self, prev_fitness, current_fitness, threshold=0.05):
+        if current_fitness - prev_fitness < threshold:  # Estancamiento o mejora lenta
+            self.mutation_rate *= 1.1  # Incrementar la tasa ligeramente
+            self.mutation_scale *= 1.1
+        elif current_fitness - prev_fitness > threshold:
+            self.mutation_rate *= 0.9  # Reducir la tasa ligeramente
+            self.mutation_scale *= 0.9
+
+        # Asegurar que la tasa de mutación permanezca dentro de límites razonables
+        self.mutation_rate = min(max(self.mutation_rate, 0.01), 0.5)
+    
     def model_crossover_v2(self, model1, model2):
         weights1 = model1.model.get_model_weights()
         weights2 = model2.model.get_model_weights()
@@ -151,9 +165,18 @@ class GeneticAlgorithm:
         """
         Genera la próxima generación a partir de la población actual.
         """
-        
+        self.fitness = 0
         # Calculo el fitness
         self.calculate_fitness()
+        
+        print(f"ACTUAL FITNESS {self.fitness}")
+        print(f"PREV FITNESS {self.prev_fitness}")
+        print(f"MUTATION RATE {self.mutation_rate}")
+        # Ajustar la tasa de mutación basándose en el fitness actual y el anterior
+        self.adjust_mutation_scale_rate(self.prev_fitness, self.fitness)
+
+        # Actualizar el fitness anterior para la próxima generación
+        self.prev_fitness = self.fitness
 
         # Paso 1: Seleccionar padres
         parents = self.select_parents_v2()

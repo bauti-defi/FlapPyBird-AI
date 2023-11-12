@@ -260,6 +260,9 @@ class Flappy:
         print("AI agent lost. Restarting...")
         
         self.ga.set_population(self.next_population)
+        print(f"Population size: {len(self.population)}")
+        print(f"New_Population size: {len(self.next_population)}")
+        print(f"Population size: {len(self.ga.get_population())}")
         self.ga.generate_new_population()
 
         self.background.tick()

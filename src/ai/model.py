@@ -19,6 +19,9 @@ class Model:
                 layers.Dense(
                     10, activation="relu", input_shape=(5,)
                 ),  # Hidden layer with 10 neurons, and input shape of 5 (number of observation variables)
+                 layers.Dense(
+                    10, activation="relu", input_shape=(5,)
+                ),  # Hidden layer with 10 neurons, and input shape of 5 (number of observation variables)
                 layers.Dense(
                     1, activation="sigmoid"
                 ),  # Output layer with 1 neuron for binary decision
