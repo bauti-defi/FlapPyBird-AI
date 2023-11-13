@@ -105,7 +105,7 @@ class NeuralNetwork:
         OUTPUT: mutatedWeight - The mutated weight
         """
         multiplier = 0
-        learning_rate = random.randint(0, 25) * 0.005
+        learning_rate = random.randint(0, 25) * 0.015
         randBool = bool(random.getrandbits(1)) #adapt upwards or downwards?
         randBool2 = bool(random.getrandbits(1)) #or not at all?
         

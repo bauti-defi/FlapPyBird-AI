@@ -151,7 +151,6 @@ class GeneticAlgorithm:
         for h in range(2): #Best two birds are taken
             bestBird = -1
             bestFitness = -10
-            print(f"POPULATON: {len(self.population)}")
             for i in range(len(self.population)): #Find the best bird
                 bird = self.population[i]
                 bird.calculate_fitness()
@@ -160,18 +159,18 @@ class GeneticAlgorithm:
                     bestBird = i
                     if (bestFitness >= self.highscore):
                         self.highscore = bestFitness
-                if ( (h == 1) and (bestFitness >= self.highscore) ):
-                    #new highscore! Let's keep the bird and update our scores
-                    self.allTimeBestBird = self.population[bestBird]
-                    self.bestInputWeights =  copy.deepcopy(
-                                            self.population[bestBird].model.inputWeights)
-                    self.bestHiddenWeights =  copy.deepcopy(
-                                            self.population[bestBird].model.hiddenWeights)
-                    print("highscore beaten {}\n{} - Generation {}"
-                                            .format(bird.model.inputWeights,
-                                            bird.model.hiddenWeights, self.generation))
-                    self.highscore = bestFitness
-                    self.highgen = self.generation
+            if (bestFitness >= self.highscore):
+                #new highscore! Let's keep the bird and update our scores
+                self.allTimeBestBird = self.population[bestBird]
+                self.bestInputWeights =  copy.deepcopy(
+                                        self.population[bestBird].model.inputWeights)
+                self.bestHiddenWeights =  copy.deepcopy(
+                                        self.population[bestBird].model.hiddenWeights)
+                print("highscore beaten {}\n{} - Generation {}"
+                                        .format(bird.model.inputWeights,
+                                        bird.model.hiddenWeights, self.generation))
+                self.highscore = bestFitness
+                self.highgen = self.generation
 
             self.birdsToBreed.append(self.population[bestBird])
             self.population.pop(i)
@@ -195,14 +194,14 @@ class GeneticAlgorithm:
         _ = Bird(self.config)
         _.model.set_weights(self.birdsToBreed[0].model.inputWeights,
                     self.birdsToBreed[0].model.hiddenWeights)
-        print(f"BIRD 1: f{_.model.get_weights()}")
+        #print(f"BIRD 1: f{_.model.get_weights()}")
         multiPlayer.append(_)
 
         #also keep the best of all time alive without mutation
         _ = Bird(self.config)
         _.model.set_weights(self.bestInputWeights,
                     self.bestHiddenWeights)
-        print(f"BIRD 2: f{_.model.get_weights()}")
+        #print(f"BIRD 2: f{_.model.get_weights()}")
         multiPlayer.append(_)
 
         for _ in range(int(BIRDS/3)):
@@ -217,7 +216,7 @@ class GeneticAlgorithm:
             if (self.respawn): #Bad genes - replace some.
                 print(f"REPLACE BAD GENES - GENERATION {self.generation} {int(BIRDS/3)}")
                 multiPlayer.append(Bird(self.config))
-                self.generation=0
+                # self.generation=0
             else:
                 #Breed and mutate the generations second best bird asometimes
                 multiPlayer.append(Bird(self.config, male=self.birdsToBreed[1].model))

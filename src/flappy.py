@@ -31,7 +31,7 @@ class Flappy:
         self.config = GameConfig(
             screen=screen,
             clock=pygame.time.Clock(),
-            fps=30,
+            fps=90,
             window=window,
             images=images,
             # sounds=Sounds(),
@@ -117,8 +117,8 @@ class Flappy:
                         return
                 
 
-                for i, pipe in enumerate(self.pipes.upper):
-                    if bird.crossed(pipe) and bird.get_mode() == PlayerMode.NORMAL:
+                for pipe_upper, pipe_lower in zip(self.pipes.upper, self.pipes.lower):
+                    if bird.crossed(pipe_upper) and bird.crossed(pipe_lower):
                         bird.add_score()
                         self.score.add()
 
