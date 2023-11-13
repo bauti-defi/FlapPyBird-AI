@@ -18,6 +18,7 @@ class Bird(Player):
         self.score = 0
         self.time_alive = 0
         self.fitness = 0
+        self.bestReported = False
         
     def start_flying(self):
         self.time_alive = time.time()

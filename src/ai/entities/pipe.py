@@ -29,6 +29,9 @@ class Pipes(Entity):
         self.spawn_initial_pipes()
 
     def get_next_pipe(self, current_x: int):
+        """
+        In each iteration of the loop, the method checks if the x-coordinate of both the upper and lower pipes is greater than current_x. If it is, that means the pair of pipes is ahead of the bird's current position, and the method returns this pair of pipes.
+        """
         for upper, lower in zip(self.upper, self.lower):
             if upper.x > current_x and lower.x > current_x:
                 return upper, lower

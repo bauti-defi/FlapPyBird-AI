@@ -12,6 +12,8 @@ class GeneticAlgorithm:
         self.config = config
         self.population = []
         self.fitness = []
+        self.highscore = 0
+        
     
     def set_population(self, new_population):
         self.population = new_population

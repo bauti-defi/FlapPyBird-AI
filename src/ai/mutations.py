@@ -13,8 +13,8 @@ def mutate_weights(weights, mutation_rate=0.1):
     return new_weights
 
 def mutate_weights_v2(weights, mutation_rate=0.1):
-    mutation_mask = np.random.uniform(0, 1, weights.shape) < 0.15
-    changes = np.random.uniform(-0.15, 0.15, weights.shape)
+    mutation_mask = np.random.uniform(0, 1, weights.shape) < 0.10
+    changes = np.random.uniform(-0.125, 0.125, weights.shape)
     return weights + mutation_mask * changes
     
 
