@@ -11,6 +11,7 @@ class GeneticAlgorithm:
         self.config = config
         self.population = []
         self.fitness = []
+        self.best_historical_population = []
     
     def set_population(self, new_population):
         self.population = new_population
@@ -37,6 +38,25 @@ class GeneticAlgorithm:
         num_parents = len(self.population) // 2
         
         parents = sorted_population[:num_parents]
+
+        prev_historical = self.best_historical_population
+
+        # add parents into historical best
+        self.best_historical_population.extend(parents)
+        self.best_historical_population = sorted(self.best_historical_population, key=lambda bird: bird.get_fitness(), reverse=True)
+
+        # replace the 2 worst parents of this generation with the 2 best historical
+        if len(prev_historical) >= 10:
+            parents[num_parents - 1] = prev_historical[0]
+            parents[num_parents - 2] = prev_historical[1]
+
+        # Has to at least cross a pipe...
+        # good_parents = filter(lambda bird: bird.get_fitness() > 8, parents)
+
+        # diff = num_parents - len(good_parents)
+
+        # for i in range(diff):
+
 
         return parents
     
@@ -84,6 +104,9 @@ class GeneticAlgorithm:
         return mutated_weights
 
     def create_new_generation(self):
+        if len(self.best_historical_population) > 100:
+            self.best_historical_population = sorted(self.best_historical_population, key=lambda bird: bird.get_fitness(), reverse=True)[:90]
+
         # Paso 1: Calculamos el fitness
         self.calculate_fitness()
         

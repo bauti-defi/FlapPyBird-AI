@@ -51,6 +51,8 @@ class Flappy:
             self.player = Bird(self.config)
             if not self.human_player:
                 self.population = self.ga.get_population()
+                for p in self.population:
+                    p.reset_bird()
             self.death_population = []
             
             self.welcome_message = WelcomeMessage(self.config)
@@ -73,8 +75,14 @@ class Flappy:
             bird.set_mode(PlayerMode.NORMAL)
 
         while True:
+            # if all population is dead, return
+            if len(list(filter(lambda bird: bird.get_mode() != PlayerMode.CRASH, self.population))) == 0:
+                return
+
             for bird in self.population:
-                bird.start_flying()
+                
+                if bird.get_mode() == PlayerMode.CRASH:
+                    continue
 
                 next_upper, next_lower = self.pipes.get_next_pipe(bird.x)
             
@@ -90,52 +98,27 @@ class Flappy:
                 # Get agent decision
                 action = bird.model.predict(self.observation)
 
-                # Perform action
-                if action == GameAction.JUMP and len(pygame.event.get()) == 0:
-                    jump_event = pygame.event.Event(
-                        pygame.KEYDOWN, {"key": pygame.K_SPACE}
-                    )
-                    pygame.event.post(jump_event)
-                elif (
-                    action == GameAction.DO_NOTHING and len(pygame.event.get()) > 0
-                ):
-                    pygame.event.clear()
-
-                await asyncio.sleep(0)
+                if action == GameAction.JUMP and bird.get_mode() == PlayerMode.NORMAL:
+                    bird.flap()
                 
                 if bird.collided(self.pipes, self.floor):
                     bird.set_mode(PlayerMode.CRASH)
-                    bird.stop_flying()
-                    
-                    # Remove bird from population
-                    self.population.remove(bird)
-                    self.death_population.append(bird)
-                    
-                    # If all birds are dead, restart the game
-                    if len(self.population) == 0:
-                        return
-                
 
                 for i, pipe in enumerate(self.pipes.upper):
                     if bird.crossed(pipe) and bird.get_mode() == PlayerMode.NORMAL:
                         bird.add_score()
                         # self.score.add()
 
-                for event in pygame.event.get():
-                    self.check_quit_event(event)
-                    if self.is_tap_event(event):
-                        bird.flap()
-
-                self.background.tick()
-                self.floor.tick()
-                self.pipes.tick()
-                self.score.tick()
-                for bird in self.population:
-                    bird.tick()
-
-                pygame.display.update()
-                await asyncio.sleep(0)
-                self.config.tick()
+                
+            for b in self.population:
+                b.tick()
+            self.background.tick()
+            self.floor.tick()
+            self.pipes.tick()
+            self.score.tick()
+            pygame.display.update()
+            await asyncio.sleep(0)
+            self.config.tick()
 
     async def splash(self):
         """Shows welcome splash screen animation of flappy bird"""
@@ -231,15 +214,12 @@ class Flappy:
             self.pipes.stop()
             self.floor.stop()
         
-            self.ga.set_population(self.death_population)
             self.ga.get_new_generation()
             
             self.background.tick()
             self.floor.tick()
             self.pipes.tick()
             self.score.tick()
-            for bird in self.population:
-                bird.tick()
             self.game_over_message.tick()
 
             self.config.tick()

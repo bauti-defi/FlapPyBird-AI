@@ -66,7 +66,7 @@ class Model:
         # Determine the action based on the highest probability
         #action = GameAction(np.argmax(action_probabilities[0]))
 
-        action_probability = self.model.predict(observation)
+        action_probability = self.model.predict(observation, verbose=0)
         action = GameAction.JUMP if action_probability > 0.5 else GameAction.DO_NOTHING
 
         return action

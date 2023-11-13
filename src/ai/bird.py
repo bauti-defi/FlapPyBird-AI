@@ -1,7 +1,7 @@
 
 import time
 from .game_result import GameResult
-from .entities.player import Player
+from .entities.player import Player, PlayerMode
 from .model import Model
 
 class Bird(Player):
@@ -14,17 +14,13 @@ class Bird(Player):
 
         self.model = Model()
         self.score = 0
-        self.time_alive = 0
         self.fitness = 0
-        
-    def start_flying(self):
-        self.time_alive = time.time()
-
-    def stop_flying(self):
-        self.time_alive = time.time() - self.time_alive
+        self.ticks_alive = 0
     
-    def reset_score(self) -> None:
+    def reset_bird(self) -> None:
         self.score = 0
+        self.ticks_alive = 0
+        self.fitness = 0
 
     def add_score(self) -> None:
         self.score += 1
@@ -38,12 +34,17 @@ class Bird(Player):
 
         # Weights for the score and time alive
         # These values can be adjusted to change the relative importance of each factor
-        weight_for_score = 1.0
-        weight_for_time_alive = 0.5
+        weight_for_score = 5.0
+        weight_for_time_alive = 0.1
 
         # Calculate the fitness as a weighted combination of the score and time alive
-        self.fitness = (weight_for_score * self.score) + (weight_for_time_alive * self.time_alive)
+        self.fitness = (weight_for_score * self.score) + (weight_for_time_alive * self.ticks_alive)
         print(f"Fitness: {self.fitness}")
 
     def get_fitness(self):
         return self.fitness
+    
+    def tick(self):
+        super(Player, self).tick()
+        if self.get_mode() != PlayerMode.CRASH:
+            self.ticks_alive += 1
