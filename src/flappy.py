@@ -6,7 +6,7 @@ from pygame.locals import K_ESCAPE, K_SPACE, K_UP, KEYDOWN, QUIT
 
 from .ai.game_observation import GameObservation
 from .ai.genetic_algorithm import GeneticAlgorithm
-from .ai.model import GameAction
+from .ai.adn import GameAction
 from .ai.bird import Bird
 from .ai.entities import (
     Background,
@@ -31,7 +31,7 @@ class Flappy:
         self.config = GameConfig(
             screen=screen,
             clock=pygame.time.Clock(),
-            fps=30,
+            fps=300,
             window=window,
             images=images,
             # sounds=Sounds(),
@@ -68,7 +68,7 @@ class Flappy:
                 await self.game_over()
 
     async def agent_play(self):
-        # self.score.reset()
+        self.score.reset()
         for bird in self.population:
             bird.set_mode(PlayerMode.NORMAL)
 
@@ -89,7 +89,7 @@ class Flappy:
 
                 # Get agent decision
                 action = bird.model.predict(self.observation)
-
+                print(f"Action: {action==GameAction.JUMP}")
                 # Perform action
                 if action == GameAction.JUMP and len(pygame.event.get()) == 0:
                     jump_event = pygame.event.Event(
@@ -101,7 +101,7 @@ class Flappy:
                 ):
                     pygame.event.clear()
 
-                await asyncio.sleep(0)
+                # await asyncio.sleep(0)
                 
                 if bird.collided(self.pipes, self.floor):
                     bird.set_mode(PlayerMode.CRASH)
@@ -119,7 +119,7 @@ class Flappy:
                 for i, pipe in enumerate(self.pipes.upper):
                     if bird.crossed(pipe) and bird.get_mode() == PlayerMode.NORMAL:
                         bird.add_score()
-                        # self.score.add()
+                        self.score.add()
 
                 for event in pygame.event.get():
                     self.check_quit_event(event)
@@ -244,4 +244,4 @@ class Flappy:
 
             self.config.tick()
             pygame.display.update()
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0)

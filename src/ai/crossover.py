@@ -1,5 +1,31 @@
 import numpy as np
 
+def crossover(parent1, parent2):
+    """
+    Realiza el cruce de un punto en los pesos de dos redes neuronales.
+    :param parent1: El primer modelo de red neuronal (padre).
+    :param parent2: El segundo modelo de red neuronal (padre).
+    :return: Dos nuevos conjuntos de pesos (para dos hijos).
+    """
+
+    # Obtener los pesos de los padres
+    W1_parent1, W2_parent1 = parent1.model.get_weights()
+    W1_parent2, W2_parent2 = parent2.model.get_weights()
+
+    # Elegir un punto de cruce aleatorio para cada conjunto de pesos
+    crossover_point_W1 = np.random.randint(1, W1_parent1.shape[0])
+    crossover_point_W2 = np.random.randint(1, W2_parent1.shape[0])
+
+    # Realizar el cruce de un punto para W1
+    new_W1_child1 = np.concatenate((W1_parent1[:crossover_point_W1, :], W1_parent2[crossover_point_W1:, :]), axis=0)
+    new_W1_child2 = np.concatenate((W1_parent2[:crossover_point_W1, :], W1_parent1[crossover_point_W1:, :]), axis=0)
+
+    # Realizar el cruce de un punto para W2
+    new_W2_child1 = np.concatenate((W2_parent1[:crossover_point_W2, :], W2_parent2[crossover_point_W2:, :]), axis=0)
+    new_W2_child2 = np.concatenate((W2_parent2[:crossover_point_W2, :], W2_parent1[crossover_point_W2:, :]), axis=0)
+
+    return (new_W1_child1, new_W2_child1), (new_W1_child2, new_W2_child2)
+    
 def model_crossover(model_idx1, model_idx2):
     global current_pool
     weights1 = current_pool[model_idx1].get_weights()

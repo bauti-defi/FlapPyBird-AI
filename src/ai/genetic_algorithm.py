@@ -3,7 +3,8 @@ from typing import List
 
 from .bird import Bird
 from .selection import mating_pool, roulette_wheel_selection
-from .mutations import gaussian_mutation, model_mutate
+from .mutations import gaussian_mutation, model_mutate, mutate_weights, mutate_weights_v2
+from .crossover import crossover
 
 
 class GeneticAlgorithm:
@@ -98,19 +99,21 @@ class GeneticAlgorithm:
             parent1, parent2 = np.random.choice(parents, 2, replace=False)
 
             # Realiza el cruce para crear dos hijos
-            child1_weights, child2_weights = self.crossover(parent1, parent2)
+            child1_weights, child2_weights = crossover(parent1, parent2)
 
             # # Aplica la mutación a los pesos de los hijos
-            child1_weights = model_mutate(child1_weights)
-            child2_weights = model_mutate(child2_weights)
-
+            mutated_child1_W1 = mutate_weights_v2(child1_weights[0], mutation_rate=0.1)
+            mutated_child1_W2 = mutate_weights_v2(child1_weights[1], mutation_rate=0.1)
+            mutated_child2_W1 = mutate_weights_v2(child2_weights[0], mutation_rate=0.1)
+            mutated_child2_W2 = mutate_weights_v2(child2_weights[1], mutation_rate=0.1)
+            
             # Crea nuevos modelos para los hijos y añádelos a la nueva población
             child1 = Bird(self.config)
-            child1.model.set_weights(child1_weights)
+            child1.model.set_weights(mutated_child1_W1, mutated_child1_W2)
             new_population.append(child1)
 
             child2 = Bird(self.config)
-            child2.model.set_weights(child2_weights)
+            child2.model.set_weights(mutated_child2_W1, mutated_child2_W2)
 
             new_population.append(child2)
 

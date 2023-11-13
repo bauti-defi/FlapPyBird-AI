@@ -1,5 +1,23 @@
 import numpy as np
 
+def mutate_weights(weights, mutation_rate=0.1):
+    """
+    Aplica una mutación a un conjunto de pesos de la red neuronal.
+    :param weights: Conjunto de pesos a mutar (ndarray).
+    :param mutation_rate: La tasa de mutación, que determina la magnitud de los cambios.
+    :return: Conjunto de pesos mutados.
+    """
+    mutation_mask = np.random.rand(*weights.shape) < mutation_rate
+    mutation = np.random.normal(size=weights.shape)
+    new_weights = weights + mutation_mask * mutation
+    return new_weights
+
+def mutate_weights_v2(weights, mutation_rate=0.1):
+    mutation_mask = np.random.uniform(0, 1, weights.shape) < 0.15
+    changes = np.random.uniform(-0.15, 0.15, weights.shape)
+    return weights + mutation_mask * changes
+    
+
 def model_mutate(weights):
     for xi in range(len(weights)):
         for yi in range(len(weights[xi])):
