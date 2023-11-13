@@ -179,7 +179,7 @@ class GeneticAlgorithm:
     
         #If no progress was made in the last 50 generations - new genes.
         print(f"GENERATION {self.generation} - HIGHGEN {self.highgen}")
-        if (self.generation-self.highgen > 20):
+        if (self.generation-self.highgen > 25):
             self.respawn = True
 
         self.generation += 1

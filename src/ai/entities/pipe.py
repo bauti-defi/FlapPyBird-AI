@@ -77,8 +77,8 @@ class Pipes(Entity):
 
     def spawn_initial_pipes(self):
         upper_1, lower_1 = self.make_random_pipes()
-        upper_1.x = self.config.window.width - 150
-        lower_1.x = self.config.window.width - 150
+        upper_1.x = self.config.window.width - 100
+        lower_1.x = self.config.window.width - 100
         self.upper.append(upper_1)
         self.lower.append(lower_1)
 
