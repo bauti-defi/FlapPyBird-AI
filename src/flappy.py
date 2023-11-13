@@ -105,6 +105,7 @@ class Flappy:
                 
                 if bird.collided(self.pipes, self.floor):
                     bird.set_mode(PlayerMode.CRASH)
+                    bird.alive = False
                     bird.stop_flying()
                     
                     # Remove bird from population
@@ -119,6 +120,7 @@ class Flappy:
                 for i, pipe in enumerate(self.pipes.upper):
                     if bird.crossed(pipe) and bird.get_mode() == PlayerMode.NORMAL:
                         bird.add_score()
+                        bird.fitness += 1
                         self.score.add()
 
                 for event in pygame.event.get():
@@ -232,7 +234,8 @@ class Flappy:
             self.floor.stop()
         
             self.ga.set_population(self.death_population)
-            self.ga.get_new_generation()
+            # self.ga.get_new_generation()
+            self.ga.get_new_generation_v2()
             
             self.background.tick()
             self.floor.tick()

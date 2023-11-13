@@ -11,14 +11,17 @@ class Bird(Player):
     Represents the bird player in the Flappy Bird game.
 
     """
-    def __init__(self, config) -> None:
+    def __init__(self, config, male = None, female = None) -> None:
         super().__init__(config)
 
-        self.model = NeuralNetwork()
+        self.model = NeuralNetwork(male=male, female=female)
         self.score = 0
         self.time_alive = 0
+        
         self.fitness = 0
         self.bestReported = False
+        self.alive = True
+        
         
     def start_flying(self):
         self.time_alive = time.time()
