@@ -15,11 +15,19 @@ class NeuralNetwork:
 
         #self.inputWeights = np.random.normal(0, scale=0.1, size=(input_size, hidden_size))
         #self.hiddenWeights = np.random.normal(0, scale=0.1, size=(hidden_size, output_size))
-        
+        m1 = np.array([[-0.49228218, -0.18985529, -0.85399669],
+                    [ 1.29168001, -0.87615453, -1.22169777],
+                    [-1.89356504, -2.98874179,  3.32321219],
+                    [ 0.27552593, -1.57704918,  1.91817933],
+                    [-2.01281056,  2.24059056, -1.50034911]])    
+        m2 = np.array([[ 3.8136693 ],
+            [ 0.92230492],
+            [-0.01239667],])
+
         if (male == None): #New Bird, no parents
             #easy network
-            self.inputWeights = np.random.normal(0, scale=0.1, size=(5, 3))
-            self.hiddenWeights = np.random.normal(0, scale=0.1, size=(3, 1))
+            self.inputWeights = m1
+            self.hiddenWeights = m2
         elif (female == None): #Only one Parent (self mutate)
             self.inputWeights = male.inputWeights
             self.hiddenWeights = male.hiddenWeights
