@@ -18,14 +18,16 @@ class GeneticAlgorithm:
         
         self.highscore = 0
         self.generation = 1
-        self.highgen = 1
+        self.highgen = 0
+
         self.maxscore = 0
+        # self.score = 0
         
         self.globalFitness = 0.0
         self.respawn = False
 
-        self.bestInputWeights = [0,0,0,0,0]
-        self.bestHiddenWeights = [0,0,0]
+        self.bestInputWeights = np.zeros((5, 3))
+        self.bestHiddenWeights = np.zeros((3, 1))
         self.birdsToBreed = [] # Cantidad de pájaros a reproducir
         
     
@@ -170,12 +172,15 @@ class GeneticAlgorithm:
                                             bird.model.hiddenWeights, self.generation))
                     self.highscore = bestFitness
                     self.highgen = self.generation
+
             self.birdsToBreed.append(self.population[bestBird])
             self.population.pop(i)
+
         print("Best genes of this generation: {}\n{}".format(self.birdsToBreed[0].model.inputWeights, self.birdsToBreed[0].model.hiddenWeights))
-        
+    
         #If no progress was made in the last 50 generations - new genes.
-        if (self.generation-self.highgen > 50):
+        print(f"GENERATION {self.generation} - HIGHGEN {self.highgen}")
+        if (self.generation-self.highgen > 20):
             self.respawn = True
 
         self.generation += 1
@@ -185,7 +190,7 @@ class GeneticAlgorithm:
     def breed(self):
         #Atleast one death happened
         multiPlayer = []
-        BIRDS = 10
+        BIRDS = 12
         #keep the best bird of generation without mutation
         _ = Bird(self.config)
         _.model.set_weights(self.birdsToBreed[0].model.inputWeights,
@@ -208,9 +213,11 @@ class GeneticAlgorithm:
             #Breed and mutate the generations best bird a couple of times
             multiPlayer.append(Bird(self.config, self.birdsToBreed[0].model))
 
-        for _ in range(int(BIRDS/3)-2):
+        for _ in range(int(BIRDS/3)):
             if (self.respawn): #Bad genes - replace some.
+                print(f"REPLACE BAD GENES - GENERATION {self.generation} {int(BIRDS/3)}")
                 multiPlayer.append(Bird(self.config))
+                self.generation=0
             else:
                 #Breed and mutate the generations second best bird asometimes
                 multiPlayer.append(Bird(self.config, male=self.birdsToBreed[1].model))

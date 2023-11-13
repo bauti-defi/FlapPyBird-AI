@@ -19,7 +19,7 @@ from .ai.entities import (
 )
 from .ai.utils import GameConfig, Images, Window
 
-BIRD_NUMBER = 10
+BIRD_NUMBER = 12
 class Flappy:
     def __init__(self):
         pygame.init()
@@ -31,7 +31,7 @@ class Flappy:
         self.config = GameConfig(
             screen=screen,
             clock=pygame.time.Clock(),
-            fps=60,
+            fps=30,
             window=window,
             images=images,
             # sounds=Sounds(),
@@ -57,6 +57,7 @@ class Flappy:
             self.game_over_message = GameOver(self.config)
             self.pipes = Pipes(self.config)
             self.score = Score(self.config)
+            # self.ga.score = self.score.score
 
             if not self.human_player:
                 print("Starting in AI mode")
@@ -68,7 +69,7 @@ class Flappy:
                 await self.game_over()
 
     async def agent_play(self):
-        self.score.reset()
+        # self.score.reset()
         for bird in self.population:
             bird.set_mode(PlayerMode.NORMAL)
 
@@ -89,7 +90,6 @@ class Flappy:
 
                 # Get agent decision
                 action = bird.model.predict(self.observation)
-                print(f"Action: {action==GameAction.JUMP}")
                 # Perform action
                 if action == GameAction.JUMP and len(pygame.event.get()) == 0:
                     jump_event = pygame.event.Event(
@@ -120,7 +120,6 @@ class Flappy:
                 for i, pipe in enumerate(self.pipes.upper):
                     if bird.crossed(pipe) and bird.get_mode() == PlayerMode.NORMAL:
                         bird.add_score()
-                        bird.fitness += 1
                         self.score.add()
 
                 for event in pygame.event.get():
@@ -230,9 +229,6 @@ class Flappy:
             # AI player
             print("AI agent lost. Restarting...")
             
-            self.pipes.stop()
-            self.floor.stop()
-        
             self.ga.set_population(self.death_population)
             # self.ga.get_new_generation()
             self.ga.get_new_generation_v2()
@@ -242,7 +238,7 @@ class Flappy:
             self.pipes.tick()
             self.score.tick()
             for bird in self.population:
-                bird.tick()
+                 bird.tick()
             self.game_over_message.tick()
 
             self.config.tick()

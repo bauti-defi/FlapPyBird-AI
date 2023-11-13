@@ -47,6 +47,7 @@ class NeuralNetwork:
         
         hidden_layer_in = np.dot(inputs, self.inputWeights)
         hidden_layer_out = self.sigmoid(hidden_layer_in)
+        
         output_layer_in = np.dot(hidden_layer_out, self.hiddenWeights)
         prediction = self.sigmoid(output_layer_in)
         return prediction
@@ -58,7 +59,7 @@ class NeuralNetwork:
         action_probability = self.forward(observation)
         action = GameAction.JUMP if (action_probability+BIAS > 0) else GameAction.DO_NOTHING
         
-        print(f"Action probability: {action_probability} - Action: {action}")
+        # print(f"Action probability: {action_probability} - Action: {action}")
         return action
 
     def relu(self, x):
