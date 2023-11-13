@@ -3,11 +3,10 @@ import numpy as np
 from typing import List
 
 from .bird import Bird
-from .selection import mating_pool, roulette_wheel_selection
-from .mutations import gaussian_mutation, model_mutate, mutate_weights, mutate_weights_v2
+from .mutations import  mutate_weights_v2
 from .crossover import crossover
 
-
+BIRD_NUMBER = 12 
 class GeneticAlgorithm:
     def __init__(self, config):
         self.config = config
@@ -21,7 +20,6 @@ class GeneticAlgorithm:
         self.highgen = 0
 
         self.maxscore = 0
-        # self.score = 0
         
         self.globalFitness = 0.0
         self.respawn = False
@@ -142,91 +140,129 @@ class GeneticAlgorithm:
         self.fitness = []
         self.create_new_generation()
         
-        
-        
-    def get_new_generation_v2(self):
-        self.birdsToBreed = []
-        
-        # SELECTION
-        for h in range(2): #Best two birds are taken
-            bestBird = -1
-            bestFitness = -10
-            for i in range(len(self.population)): #Find the best bird
-                bird = self.population[i]
-                bird.calculate_fitness()
-                if (bird.fitness > bestFitness):
-                    bestFitness = bird.fitness
-                    bestBird = i
-                    if (bestFitness >= self.highscore):
-                        self.highscore = bestFitness
-            if (bestFitness >= self.highscore):
-                #new highscore! Let's keep the bird and update our scores
-                self.allTimeBestBird = self.population[bestBird]
-                self.bestInputWeights =  copy.deepcopy(
-                                        self.population[bestBird].model.inputWeights)
-                self.bestHiddenWeights =  copy.deepcopy(
-                                        self.population[bestBird].model.hiddenWeights)
-                print("highscore beaten {}\n{} - Generation {}"
-                                        .format(bird.model.inputWeights,
-                                        bird.model.hiddenWeights, self.generation))
-                self.highscore = bestFitness
-                self.highgen = self.generation
+    
+    def parents_select(self):
+        """
+            Selecciona los padres para la próxima generación basándose en su aptitud (fitness).
 
-            self.birdsToBreed.append(self.population[bestBird])
+            Esta función realiza los siguientes pasos:
+            1. Pre-calcula la aptitud de cada pájaro y la almacena junto con su índice en la población.
+            2. Ordena a los pájaros por su aptitud y selecciona los dos con mayor aptitud.
+            3. Actualiza el puntaje alto (highscore) y el mejor pájaro de todos los tiempos si se encuentra un nuevo récord.
+            4. Añade los pájaros seleccionados a la lista de pájaros para cría.
+            5. Elimina los pájaros seleccionados de la población actual.
+            6. Comprueba si es necesario reiniciar la población basándose en el progreso de las generaciones.
+
+            Al final de la función, la población se ha reducido y se han seleccionado los candidatos para la cría de la próxima generación.
+
+            Atributos:
+                self.population (lista): La población actual de pájaros.
+                self.birdsToBreed (lista): Los pájaros seleccionados para la cría.
+                self.highscore (float): El mejor puntaje obtenido hasta ahora.
+                self.highgen (int): La generación en la que se obtuvo el highscore.
+                self.allTimeBestBird (Bird): El mejor pájaro de todos los tiempos.
+                self.bestInputWeights (lista): Los pesos de entrada del mejor pájaro de todos los tiempos.
+                self.bestHiddenWeights (lista): Los pesos ocultos del mejor pájaro de todos los tiempos.
+                self.respawn (bool): Indicador para determinar si se reinicia la población.
+                self.generation (int): El contador actual de generación.
+        """
+    
+        # Pre-calcular la aptitud (fitness) de cada pájaro y almacenarla junto con su índice
+        fitness_and_indices = [(i, bird.calculate_fitness()) for i, bird in enumerate(self.population)]
+
+        # Ordenar por fitness y tomar los dos mejores
+        sorted_by_fitness = sorted(fitness_and_indices, key=lambda x: x[1], reverse=True)[:2]
+
+        for i, best_fitness in sorted_by_fitness:
+            best_bird = self.population[i]
+
+            if best_fitness >= self.highscore:
+                self.highscore = best_fitness
+                self.highgen = self.generation
+                self.allTimeBestBird = best_bird
+                self.bestInputWeights = copy.deepcopy(best_bird.model.inputWeights)
+                self.bestHiddenWeights = copy.deepcopy(best_bird.model.hiddenWeights)
+
+                print(f"highscore beaten {best_bird.model.inputWeights} - {best_bird.model.hiddenWeights} - Generation {self.generation}")
+
+            self.birdsToBreed.append(best_bird)
+
+        # Eliminar los pájaros seleccionados de la población
+        for i, _ in sorted(sorted_by_fitness, reverse=True):
             self.population.pop(i)
 
-        print("Best genes of this generation: {}\n{}".format(self.birdsToBreed[0].model.inputWeights, self.birdsToBreed[0].model.hiddenWeights))
-    
-        #If no progress was made in the last 50 generations - new genes.
+        print(f"Best genes of this generation: {self.birdsToBreed[0].model.inputWeights}\n{self.birdsToBreed[0].model.hiddenWeights}")
+        
+        # Revisar si es necesario reiniciar la población
         print(f"GENERATION {self.generation} - HIGHGEN {self.highgen}")
-        if (self.generation-self.highgen > 25):
+        if (self.generation - self.highgen > 15):
             self.respawn = True
 
         self.generation += 1
-        self.breed()
-        
-        
+
+
     def breed(self):
-        #Atleast one death happened
-        multiPlayer = []
-        BIRDS = 12
-        #keep the best bird of generation without mutation
-        _ = Bird(self.config)
-        _.model.set_weights(self.birdsToBreed[0].model.inputWeights,
-                    self.birdsToBreed[0].model.hiddenWeights)
-        #print(f"BIRD 1: f{_.model.get_weights()}")
-        multiPlayer.append(_)
+        """
+            Crea una nueva generación de pájaros basada en la actual piscina de cría.
 
-        #also keep the best of all time alive without mutation
-        _ = Bird(self.config)
-        _.model.set_weights(self.bestInputWeights,
-                    self.bestHiddenWeights)
-        #print(f"BIRD 2: f{_.model.get_weights()}")
-        multiPlayer.append(_)
-
-        for _ in range(int(BIRDS/3)):
-            #Breed and mutate the two generations best birds sometimes
-            multiPlayer.append(Bird(self.config, male=self.birdsToBreed[0].model,
-                                            female=self.birdsToBreed[1].model))
-        for _ in range(int(BIRDS/3)):
-            #Breed and mutate the generations best bird a couple of times
-            multiPlayer.append(Bird(self.config, self.birdsToBreed[0].model))
-
-        for _ in range(int(BIRDS/3)):
-            if (self.respawn): #Bad genes - replace some.
-                print(f"REPLACE BAD GENES - GENERATION {self.generation} {int(BIRDS/3)}")
-                multiPlayer.append(Bird(self.config))
-                # self.generation=0
-            else:
-                #Breed and mutate the generations second best bird asometimes
-                multiPlayer.append(Bird(self.config, male=self.birdsToBreed[1].model))
-
-        # if (ReplayBest): #Used to replay a very good bird
-        #     multiPlayer[2].set_weights(startInputGenes, startHiddenGenes)
-
-        if (self.respawn):
-            self.respawn = False
-            print("Due to natural selection - one third of birds " +
-                    "receives new genes")
+            Esta función realiza los siguientes pasos:
+            1. Conserva el mejor pájaro de la generación actual y el mejor de todos los tiempos sin mutación.
+            2. Cría y muta a los dos mejores pájaros de la generación actual para un tercio de la nueva población.
+            3. Cría y muta al mejor pájaro de la generación actual para otro tercio de la nueva población.
+            4. Para el tercio final, cría al segundo mejor pájaro o reemplaza con nuevos pájaros basado en la bandera `respawn`.
+            Si `respawn` es verdadero, indica genes malos y reemplaza un tercio de los pájaros con nuevos, reiniciando el contador de generaciones.
             
-        self.population = multiPlayer
+            La nueva población reemplaza a la población actual al final de la función.
+
+            Atributos:
+                BIRDS (int): Número total de pájaros en la población.
+                third_of_birds (int): Un tercio del tamaño total de la población, utilizado para segmentos de cría.
+                self.population (lista): La población actual de pájaros, que será reemplazada por la nueva generación.
+                self.birdsToBreed (lista): Los mejores pájaros de la generación actual utilizados para la cría.
+                self.bestInputWeights (lista): Los pesos de entrada del mejor pájaro de todos los tiempos.
+                self.bestHiddenWeights (lista): Los pesos ocultos del mejor pájaro de todos los tiempos.
+                self.respawn (bool): Indicador de si es necesario reemplazar genes malos en la población.
+                self.generation (int): El conteo actual de generaciones, incrementado o reiniciado basado en `respawn`.
+        """
+        third_of_birds = int(BIRD_NUMBER / 3)
+        
+        self.population = []
+
+        # Conservar el mejor pájaro de la generación y el mejor de todos los tiempos sin mutación
+        best_of_generation = Bird(self.config)
+        best_of_generation.model.set_weights(self.birdsToBreed[0].model.inputWeights,
+                                            self.birdsToBreed[0].model.hiddenWeights)
+        self.population.append(best_of_generation)
+
+        best_of_all_time = Bird(self.config)
+        best_of_all_time.model.set_weights(self.bestInputWeights, self.bestHiddenWeights)
+        self.population.append(best_of_all_time)
+
+        # Cría y mutación con los dos mejores pájaros de la generación
+        for _ in range(third_of_birds):
+            self.population.append(Bird(self.config, male=self.birdsToBreed[0].model,
+                                        female=self.birdsToBreed[1].model))
+
+        # Cría y mutación con el mejor pájaro de la generación
+        for _ in range(third_of_birds):
+            self.population.append(Bird(self.config, self.birdsToBreed[0].model))
+
+        # Manejar los genes malos o cría con el segundo mejor pájaro
+        for _ in range(third_of_birds):
+            if self.respawn:
+                self.population.append(Bird(self.config))
+            else:
+                self.population.append(Bird(self.config, male=self.birdsToBreed[1].model))
+
+        if self.respawn:
+            self.respawn = False
+            self.generation = 0
+            print(f"REPLACE BAD GENES - GENERATION {self.generation} {third_of_birds}")
+            print("Due to natural selection - one third of birds receives new genes")
+        else:
+            self.generation += 1
+        
+    def get_new_generation_v2(self):
+        self.birdsToBreed = []
+        self.parents_select()
+        self.breed()

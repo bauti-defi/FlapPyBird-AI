@@ -9,12 +9,27 @@ class GameAction(Enum):
 
 class NeuralNetwork:
     def __init__(self, input_size=5, hidden_size=3, output_size=1, male = None, female = None):
+        """
+            Inicializa una nueva instancia de la red neuronal.
+
+            Si se proporcionan objetos 'male' y 'female', se utiliza su información genética
+            para inicializar los pesos de la red. En caso contrario, los pesos se inicializan
+            aleatoriamente. Si solo se proporciona 'male', se utiliza su información genética
+            con mutación.
+
+            Parámetros:
+                input_size (int): Tamaño de la capa de entrada.
+                hidden_size (int): Tamaño de la capa oculta.
+                output_size (int): Tamaño de la capa de salida.
+                male (NeuralNetwork, opcional): Red neuronal del 'padre'.
+                female (NeuralNetwork, opcional): Red neuronal de la 'madre'.
+        """
+
         self.inputSize = input_size
         self.outputSize = output_size
         self.hiddenSize = hidden_size
 
         #self.inputWeights = np.random.normal(0, scale=0.1, size=(input_size, hidden_size))
-        #self.hiddenWeights = np.random.normal(0, scale=0.1, size=(hidden_size, output_size))
         m1 = np.array([[-0.49228218, -0.18985529, -0.85399669],
                     [ 1.29168001, -0.87615453, -1.22169777],
                     [-1.89356504, -2.98874179,  3.32321219],
@@ -38,29 +53,54 @@ class NeuralNetwork:
             self.breed(male, female)
         
     def get_weights(self):
+        """
+            Devuelve los pesos actuales de la red neuronal.
+
+            Retorna:
+                Tuple: Tupla conteniendo los pesos de la capa de entrada y oculta.
+        """
         return self.inputWeights, self.hiddenWeights
     
     def set_weights(self, w1, w2):
+        """
+            Establece los pesos de la red neuronal.
+
+            Parámetros:
+                w1 (array): Pesos de la capa de entrada.
+                w2 (array): Pesos de la capa oculta.
+        """
         self.inputWeights = w1
         self.hiddenWeights = w2
         
     def forward(self, inputs):
-        
-        # Propagación hacia adelante
-        #self.hidden = sigmoid(np.dot(inputs, self.inputWeights))  # Activación de la capa oculta
-        
-        #self.hidden = sigmoid(np.dot(inputs, self.inputWeights))
-        #output = sigmoid(np.dot(self.hidden, self.hiddenWeights))  # Activación de la capa de salida
-        #return output
+        """
+            Realiza la propagación hacia adelante (forward pass) de la red neuronal.
+
+            Parámetros:
+                inputs (array): Entrada a la red.
+
+            Retorna:
+                El resultado de la propagación hacia adelante.
+        """
         
         hidden_layer_in = np.dot(inputs, self.inputWeights)
         hidden_layer_out = self.sigmoid(hidden_layer_in)
         
         output_layer_in = np.dot(hidden_layer_out, self.hiddenWeights)
         prediction = self.sigmoid(output_layer_in)
+
         return prediction
 
     def predict(self, game_observation):
+        """
+            Predice la acción a realizar basada en una observación del juego.
+
+            Parámetros:
+                game_observation: Observación del estado actual del juego.
+
+            Retorna:
+                GameAction: La acción a realizar (salto o no hacer nada).
+        """
         BIAS = -0.5
         
         observation = game_observation.as_vector().reshape(1, -1)
@@ -71,23 +111,38 @@ class NeuralNetwork:
         return action
 
     def relu(self, x):
-        """The relu actication function for the neural network
-        INPUT: x - The value to apply the ReLu function on
-        OUTPUT: The applied ReLus function value"""
+        """
+        Función de activación ReLU.
+
+        Parámetros:
+            x (array): Valor(es) de entrada.
+
+        Retorna:
+            El resultado de aplicar la función ReLU.
+        """
         return np.maximum(x, 0)
 
     def sigmoid(self, x):
-        """The sigmoid activation function for the neural net   
-        INPUT: x - The value to calculate
-        OUTPUT: The calculated result"""    
+        """
+        Función de activación sigmoide.
+
+        Parámetros:
+            x (array): Valor(es) de entrada.
+
+        Retorna:
+            El resultado de aplicar la función sigmoide.
+        """
         return 1 / (1 + np.exp(-x))
 
     def breed(self, male, female):
-        """Generate a new brain (neural network) from two parent birds
-         	by averaging their brains and mutating them afterwards
-        INPUT:  male - The male bird object (of class bird)
-        		female - The female bird object (of class bird)
-        OUTPUT:	None"""
+        """
+        Genera una nueva red neuronal a partir de dos 'padres', promediando sus pesos
+        y aplicando mutación posteriormente.
+
+        Parámetros:
+            male (NeuralNetwork): Red neuronal del 'padre'.
+            female (NeuralNetwork): Red neuronal de la 'madre'.
+        """
         for i in range(len(self.inputWeights)):
             self.inputWeights[i] = (male.inputWeights[i] + female.inputWeights[i]) / 2
         for i in range(len(self.hiddenWeights)):
@@ -95,10 +150,9 @@ class NeuralNetwork:
         self.mutate()
   
     def mutate(self):
-        """mutate (randomly apply the learning rate) the birds brain
-        neural network) randomly changing the individual weights
-        INPUT:  None
-        OUTPUT:	None"""
+        """
+            Aplica mutaciones aleatorias a los pesos de la red neuronal.
+        """
         for i in range(len(self.inputWeights)):
             for j in range(len(self.inputWeights[i])):
                 self.inputWeights[i][j] = self.getMutatedGene(self.inputWeights[i][j])
@@ -108,9 +162,14 @@ class NeuralNetwork:
 
 
     def getMutatedGene(self, weight):
-        """mutate the input by -0.125 to 0.125 or not at all
-        INPUT: weight - The weight to mutate
-        OUTPUT: mutatedWeight - The mutated weight
+        """
+            Aplica una mutación a un peso específico de la red.
+
+            Parámetros:
+                weight (float): Peso a mutar.
+
+            Retorna:
+                float: El peso mutado.
         """
         multiplier = 0
         learning_rate = random.randint(0, 25) * 0.015
