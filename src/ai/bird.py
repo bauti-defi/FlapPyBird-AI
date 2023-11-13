@@ -1,5 +1,7 @@
 
 import time
+
+from .adn import NeuralNetwork
 from .game_result import GameResult
 from .entities.player import Player
 from .model import Model
@@ -12,7 +14,7 @@ class Bird(Player):
     def __init__(self, config) -> None:
         super().__init__(config)
 
-        self.model = Model()
+        self.model = NeuralNetwork()
         self.score = 0
         self.time_alive = 0
         self.fitness = 0
