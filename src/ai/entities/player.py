@@ -16,10 +16,10 @@ class PlayerMode(Enum):
 
 
 class Player(Entity):
-    def __init__(self, config: GameConfig) -> None:
+    def __init__(self, config: GameConfig, random_y=0) -> None:
         image = config.images.player[0]
         x = int(config.window.width * 0.2)
-        y = int((config.window.height - image.get_height()) / 2)
+        y = int((config.window.height - image.get_height()) / 2 - random_y)
         super().__init__(config, image, x, y)
         self.min_y = -2 * self.h
         self.max_y = config.window.viewport_height - self.h * 0.75
@@ -34,14 +34,15 @@ class Player(Entity):
         self.mode = mode
         if mode == PlayerMode.NORMAL:
             self.reset_vals_normal()
-            self.config.sounds.wing.play()
+            #self.config.sounds.wing.play()
         elif mode == PlayerMode.SHM:
             self.reset_vals_shm()
         elif mode == PlayerMode.CRASH:
             self.stop_wings()
-            self.config.sounds.hit.play()
+            #self.config.sounds.hit.play()
             if self.crash_entity == "pipe":
-                self.config.sounds.die.play()
+                #self.config.sounds.die.play()
+                pass
             self.reset_vals_crash()
 
     def reset_vals_normal(self) -> None:
@@ -139,7 +140,7 @@ class Player(Entity):
             self.vel_y = self.flap_acc
             self.flapped = True
             self.rot = 80
-            self.config.sounds.wing.play()
+            #self.config.sounds.wing.play()
 
     def crossed(self, pipe: Pipe) -> bool:
         return pipe.cx <= self.cx < pipe.cx - pipe.vel_x
